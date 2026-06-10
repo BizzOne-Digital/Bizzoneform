@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-const TRUSTINDEX_SRC = "https://cdn.trustindex.io/loader.js?d9f3a0e73ef363416236d7fa18d";
+const TRUSTINDEX_SRC = "https://cdn.trustindex.io/loader.js?a6cbda97390f954f2876dfb8feb";
 
 export default function Reviews() {
   const ref = useRef<HTMLDivElement>(null);

@@ -20,26 +20,24 @@ export async function POST(req: Request) {
     const list = (a: unknown) => (Array.isArray(a) && a.length ? a.join(", ") : "None");
     const results: string[] = [];
 
-    // 1) GoHighLevel webhook — send everything
+    // 1) GoHighLevel webhook
     try {
       const ghlRes = await fetch(GHL_WEBHOOK, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name, email, phone, business,
-          address: v(d.address), website: v(d.site), social: v(d.social),
-          service: v(d.service), priority: v(d.priority), launch: v(d.launch),
-          goal: v(d.goal), audience: v(d.audience), usp: v(d.usp),
+          package: v(d.package), addons: list(d.addons),
+          website: v(d.site), social: v(d.social),
+          service: v(d.service), goal: v(d.goal), audience: v(d.audience),
           logo: v(d.logo), colors: v(d.colors), style: v(d.style), inspiration: v(d.inspo),
-          pages: list(d.pages), headline: v(d.headline), about: v(d.about),
-          services_products: v(d.services), pricing: v(d.pricing),
-          domain: v(d.domain), hosting: v(d.hosting), features: list(d.features), notes: v(d.notes),
+          pages: list(d.pages), headline: v(d.headline), about: v(d.about), notes: v(d.notes),
         }),
       });
       results.push(ghlRes.ok ? "GHL: ok" : `GHL: ${ghlRes.status}`);
     } catch (e) {
       results.push("GHL: failed");
-      console.error("GHL webhook error:", e);
+      console.error("GHL error:", e);
     }
 
     // 2) ClickUp task (if configured)
@@ -49,18 +47,20 @@ export async function POST(req: Request) {
     if (TOKEN && LIST) {
       try {
         const desc =
-`## 📋 Contact & Project
+`## 💳 Package & Add-Ons
+**Package:** ${v(d.package)}
+**Add-Ons:** ${list(d.addons)}
+
+## 📋 Contact
 **Business:** ${v(business)}
 **Contact:** ${v(name)} | ${v(email)} | ${v(phone)}
-**Address:** ${v(d.address)}
 **Current Website:** ${v(d.site)}
 **Social:** ${v(d.social)}
+
+## 📝 Project
 **Service:** ${v(d.service)}
-**Priority:** ${v(d.priority)}
-**Expected Timeline:** ${v(d.launch)}
 **Goal:** ${v(d.goal)}
 **Audience:** ${v(d.audience)}
-**Difference:** ${v(d.usp)}
 
 ## 🎨 Brand & Design
 **Logo:** ${v(d.logo)}
@@ -68,53 +68,37 @@ export async function POST(req: Request) {
 **Design Style:** ${v(d.style)}
 **Inspiration:** ${v(d.inspo)}
 
-## 📝 Content
+## 📄 Content
 **Pages:** ${list(d.pages)}
 **Headline:** ${v(d.headline)}
 **About:** ${v(d.about)}
-**Services / Products:** ${v(d.services)}
-**Display Pricing:** ${v(d.pricing)}
-
-## 🔧 Technical
-**Domain:** ${v(d.domain)}
-**Hosting:** ${v(d.hosting)}
-**Features:** ${list(d.features)}
 **Notes:** ${v(d.notes)}
 
 ---
 *Submitted via BizzOne Digital lead form*`;
 
-        const prio = String(d.priority || "").toLowerCase();
-        const priority = prio.startsWith("urgent") ? 1 : prio.startsWith("high") ? 2 : prio.startsWith("low") ? 4 : 3;
-
-        const body: Record<string, unknown> = {
-          name: `${business} — ${name} | ${v(d.service)}`,
-          markdown_description: desc,
-          priority,
-          status: process.env.CLICKUP_STATUS || "not started",
-          tags: ["lead", "website"],
-        };
-        if (d.launch && !Number.isNaN(Date.parse(String(d.launch)))) body.due_date = Date.parse(String(d.launch));
-
         const cuRes = await fetch(`https://api.clickup.com/api/v2/list/${LIST}/task`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: TOKEN },
-          body: JSON.stringify(body),
+          body: JSON.stringify({
+            name: `${business} — ${name} | ${v(d.package)}`,
+            markdown_description: desc,
+            status: process.env.CLICKUP_STATUS || "not started",
+            tags: ["lead", "website"],
+          }),
         });
         const cuData = await cuRes.json().catch(() => ({}));
-        results.push(cuRes.ok ? "ClickUp: ok" : `ClickUp: ${cuRes.status} ${JSON.stringify(cuData)}`);
+        results.push(cuRes.ok ? "ClickUp: ok" : `ClickUp: ${cuRes.status}`);
       } catch (e) {
         results.push("ClickUp: failed");
         console.error("ClickUp error:", e);
       }
-    } else {
-      results.push("ClickUp: skipped (not configured)");
     }
 
-    console.log("Lead submitted:", results.join(" | "));
+    console.log("Lead:", results.join(" | "));
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("Lead route error:", err);
-    return NextResponse.json({ error: "Failed to submit. Please try again." }, { status: 500 });
+    console.error("Lead error:", err);
+    return NextResponse.json({ error: "Failed to submit." }, { status: 500 });
   }
 }
