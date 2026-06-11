@@ -16,25 +16,58 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Please fill in your business, name, email and phone." }, { status: 400 });
     }
 
-    const v = (x: unknown) => (x && String(x).trim()) || "—";
-    const list = (a: unknown) => (Array.isArray(a) && a.length ? a.join(", ") : "None");
+    const v = (x: unknown): string => { const s = String(x ?? "").trim(); return s || "—"; };
+    const list = (a: unknown): string => (Array.isArray(a) && a.length ? a.join(", ") : "None");
     const results: string[] = [];
 
-    // 1) GoHighLevel webhook
+    // Split name for GHL
+    const nameParts = name.split(" ");
+    const firstName = nameParts[0] || name;
+    const lastName = nameParts.slice(1).join(" ") || "";
+
+    // 1) GoHighLevel webhook — use GHL-standard field names
     try {
+      const ghlPayload = {
+        // GHL standard contact fields
+        firstName,
+        lastName,
+        name,
+        email,
+        phone,
+        companyName: business,
+        source: "BizzOne Digital Website",
+
+        // Custom data
+        full_name: name,
+        business_name: business,
+        package_selected: v(d.package),
+        addons: list(d.addons),
+        website: v(d.site),
+        social: v(d.social),
+        service: v(d.service),
+        goal: v(d.goal),
+        audience: v(d.audience),
+        logo: v(d.logo),
+        colors: v(d.colors),
+        style: v(d.style),
+        inspiration: v(d.inspo),
+        pages: list(d.pages),
+        headline: v(d.headline),
+        about: v(d.about),
+        notes: v(d.notes),
+      };
+
+      console.log("GHL payload:", JSON.stringify(ghlPayload, null, 2));
+
       const ghlRes = await fetch(GHL_WEBHOOK, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name, email, phone, business,
-          package: v(d.package), addons: list(d.addons),
-          website: v(d.site), social: v(d.social),
-          service: v(d.service), goal: v(d.goal), audience: v(d.audience),
-          logo: v(d.logo), colors: v(d.colors), style: v(d.style), inspiration: v(d.inspo),
-          pages: list(d.pages), headline: v(d.headline), about: v(d.about), notes: v(d.notes),
-        }),
+        body: JSON.stringify(ghlPayload),
       });
-      results.push(ghlRes.ok ? "GHL: ok" : `GHL: ${ghlRes.status}`);
+
+      const ghlBody = await ghlRes.text().catch(() => "");
+      console.log(`GHL response: ${ghlRes.status} ${ghlRes.statusText} — ${ghlBody}`);
+      results.push(ghlRes.ok ? "GHL: ok" : `GHL: ${ghlRes.status} ${ghlBody}`);
     } catch (e) {
       results.push("GHL: failed");
       console.error("GHL error:", e);
@@ -95,7 +128,7 @@ export async function POST(req: Request) {
       }
     }
 
-    console.log("Lead:", results.join(" | "));
+    console.log("Lead submitted:", results.join(" | "));
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Lead error:", err);
