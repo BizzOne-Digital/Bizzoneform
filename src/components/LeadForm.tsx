@@ -154,7 +154,8 @@ export default function LeadForm() {
 
         <div className="mx-auto max-w-3xl rounded-3xl glass-strong p-5 sm:p-8">
 
-          
+      
+
           {/* ── Step 1: Package ── */}
           <Divider>Choose Your Package</Divider>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -244,7 +245,14 @@ export default function LeadForm() {
 
           {status === "error" && <p className="mt-5 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-base text-red-300">{err}</p>}
 
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+          {/* Project notice */}
+          <div className="mt-8 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4 text-sm leading-relaxed text-white/70">
+            <p className="font-semibold text-amber-300">⚠ Please note:</p>
+            <p className="mt-2">We have limited project slots available, so we request that you stay available for the next <strong className="text-white">4–5 days</strong> after submitting this form for any required content, feedback, or approvals.</p>
+            <p className="mt-2">Delays in communication or missing information may affect the project timeline. If we do not receive the required details or responses on time, we may need to <strong className="text-white">pause/close your project</strong> and assign the slot to another client.</p>
+          </div>
+
+          <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
             <span className="text-sm text-white/45">🔒 Your information is secure and only used for your project.</span>
             <button onClick={submit} disabled={status === "sending"}
               className="inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-brand-mint px-8 py-4 text-base font-bold text-ink shadow-glow-mint transition-all hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60 sm:w-auto">
