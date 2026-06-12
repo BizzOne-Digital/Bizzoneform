@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 :root { --brand-purple: #8C00FF; --brand-purple-light: #B47BFF; --brand-mint: #C8F31D; }
-html { scroll-behavior: smooth; font-size: 106.25%; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 106.25%; overflow-x: hidden; }
+body { overflow-x: hidden; }
 
 .bg-space {
   position: fixed; inset: 0; z-index: -2;

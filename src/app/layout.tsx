@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import ChatBot from "@/components/ChatBot";
 
 export const metadata: Metadata = {
   title: "Get Started | BizzOne Digital",
-  description: "Fill in your details and our team will reach out within 24–48 hours.",
+  description:
+    "Fill in your details and our team will reach out within 24–48 hours.",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
@@ -28,6 +30,7 @@ export default function RootLayout({
         <div className="bg-space" />
         <div className="bg-grid" />
         {children}
+        <ChatBot />
       </body>
     </html>
   );

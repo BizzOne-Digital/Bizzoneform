@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Send, CheckCircle2, Crown, ClipboardList, Palette, Code2, Rocket, Check, ShieldCheck } from "lucide-react";
 import { SERVICES } from "@/lib/services";
 
-const field = "w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder-white/35 outline-none transition-colors focus:border-brand-mint/60";
-const labelCls = "mb-1.5 block text-sm font-medium text-white/80";
+const field = "w-full rounded-2xl border border-white/12 bg-white/[0.05] px-5 py-3.5 text-base text-white placeholder-white/40 outline-none transition-colors focus:border-brand-mint/60";
+const labelCls = "mb-2 block text-base font-semibold text-white/90";
 const darkOpt = { background: "#0f0a1a", color: "#e9e6f2" };
 
 /* ─── process steps ─── */
@@ -38,8 +38,6 @@ const ADDONS: Addon[] = [
   { id: "crm", label: "CRM Integration", desc: "Connect to your CRM (GoHighLevel, etc.)", premium: true },
   { id: "multilang", label: "Multi-Language", desc: "Website in multiple languages", premium: true },
   { id: "custom-design", label: "Fully Custom Design", desc: "Bespoke design, no templates", premium: true },
-  { id: "social-feed", label: "Social Media Feed", desc: "Live Instagram/Facebook feed on site" },
-  { id: "google-maps", label: "Google Maps", desc: "Embed your business location" },
 ];
 
 const GOALS = ["Generate leads", "Sell products online", "Book appointments", "Build brand awareness", "Showcase portfolio", "Inform customers"];
@@ -49,20 +47,20 @@ const PAGES = ["Home", "About Us", "Services", "Contact", "Gallery / Portfolio",
 
 function Divider({ children }: { children: React.ReactNode }) {
   return (
-    <div className="my-7 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-mint/80">
-      <span className="h-px flex-1 bg-white/10" />{children}<span className="h-px flex-1 bg-white/10" />
+    <div className="my-8 flex items-center gap-3 text-sm font-bold uppercase tracking-[0.18em] text-brand-mint">
+      <span className="h-px flex-1 bg-white/12" />{children}<span className="h-px flex-1 bg-white/12" />
     </div>
   );
 }
 
 function Pills({ options, selected, onToggle }: { options: string[]; selected: string[]; onToggle: (v: string) => void }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2.5">
       {options.map((o) => {
         const on = selected.includes(o);
         return (
           <button key={o} type="button" onClick={() => onToggle(o)}
-            className={`rounded-full border px-3.5 py-2 text-sm font-medium transition-all ${on ? "border-brand-mint bg-brand-mint/15 text-brand-mint" : "border-white/12 text-white/65 hover:border-white/30"}`}>
+            className={`rounded-full border px-4 py-2.5 text-sm font-semibold transition-all ${on ? "border-brand-mint bg-brand-mint/20 text-brand-mint" : "border-white/15 text-white/70 hover:border-white/35"}`}>
             {o}
           </button>
         );
@@ -131,7 +129,7 @@ export default function LeadForm() {
             <CheckCircle2 size={34} />
           </span>
           <h3 className="mt-5 text-2xl font-bold text-white">Submitted successfully!</h3>
-          <p className="mt-3 text-sm leading-relaxed text-white/60">
+          <p className="mt-3 text-base leading-relaxed text-white/70">
             Thanks {f.name.split(" ")[0]} — our team will review your details and reach out within 24–48 hours to begin.
           </p>
         </div>
@@ -144,26 +142,19 @@ export default function LeadForm() {
       <div className="section">
 
         {/* ── Process steps ── */}
-        <div className="mx-auto mb-12 grid max-w-4xl grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+        <div className="mx-auto mb-12 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4">
           {STEPS.map((s) => (
-            <div key={s.title} className="rounded-2xl glass p-3 sm:p-4 text-center">
-              <span className="mx-auto mb-2 grid h-10 w-10 place-items-center rounded-xl bg-brand-mint/10 text-brand-mint"><s.icon size={18} /></span>
-              <div className="text-sm font-bold text-white">{s.title}</div>
-              <p className="mt-1 text-xs leading-snug text-white/50">{s.desc}</p>
+            <div key={s.title} className="rounded-2xl glass p-6 text-center">
+              <span className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-xl bg-brand-mint/15 text-brand-mint"><s.icon size={28} /></span>
+              <div className="text-xl font-bold text-white">{s.title}</div>
+              <p className="mt-2 text-base leading-snug text-white">{s.desc}</p>
             </div>
           ))}
         </div>
 
-        <div className="mx-auto max-w-3xl rounded-3xl glass-strong p-5 sm:p-6 md:p-8">
+        <div className="mx-auto max-w-3xl rounded-3xl glass-strong p-5 sm:p-8">
 
-          {/* ── Pay-after note ── */}
-          <div className="mb-5 flex items-center gap-2 rounded-xl border border-brand-mint/30 bg-brand-mint/10 px-4 py-3 text-center sm:text-left">
-            <ShieldCheck size={18} className="hidden shrink-0 text-brand-mint sm:block" />
-            <p className="w-full text-xs font-semibold text-brand-mint sm:text-sm">
-              Pay after you are satisfied with your design — no payment is required to submit this form.
-            </p>
-          </div>
-
+          
           {/* ── Step 1: Package ── */}
           <Divider>Choose Your Package</Divider>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -171,15 +162,15 @@ export default function LeadForm() {
               <button key={p.id} type="button" onClick={() => setPkg(p.id)}
                 className={`relative flex flex-col rounded-2xl p-5 text-left transition-all ${pkg === p.id ? "neon-border shadow-glow-purple" : "glass hover:shadow-glow-purple"}`}>
                 {pkg === p.id && <span className="absolute right-4 top-4 grid h-6 w-6 place-items-center rounded-full bg-brand-mint text-ink"><Check size={14} strokeWidth={3} /></span>}
-                <div className="text-xs font-semibold uppercase tracking-wide text-brand-mint">{p.name}</div>
+                <div className="text-sm font-bold uppercase tracking-wide text-brand-mint">{p.name}</div>
                 <div className="mt-1 flex items-end gap-1">
-                  <span className="text-3xl font-extrabold text-white">{p.price}</span>
-                  <span className="mb-0.5 text-xs text-white/45">one-time</span>
+                  <span className="text-4xl font-extrabold text-white">{p.price}</span>
+                  <span className="mb-1 text-sm text-white/50">one-time</span>
                 </div>
-                <p className="mt-2 text-sm text-white/55">{p.tagline}</p>
-                <ul className="mt-3 space-y-1.5 border-t border-white/10 pt-3">
+                <p className="mt-2 text-base text-white/60">{p.tagline}</p>
+                <ul className="mt-3 space-y-2 border-t border-white/10 pt-3">
                   {p.includes.map((it) => (
-                    <li key={it} className="flex items-center gap-2 text-xs text-white/65"><Check size={12} className="shrink-0 text-brand-mint" />{it}</li>
+                    <li key={it} className="flex items-center gap-2.5 text-sm text-white/70"><Check size={14} className="shrink-0 text-brand-mint" />{it}</li>
                   ))}
                 </ul>
               </button>
@@ -188,26 +179,26 @@ export default function LeadForm() {
 
           {/* ── Add-ons ── */}
           <Divider>Add-Ons</Divider>
-          <p className="mb-4 text-xs text-white/50">Select any extras you need. Items marked with <span className="inline-flex items-center gap-1 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-300"><Crown size={10} /> ADDITIONAL COST</span> will be quoted separately based on your selected package.</p>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <p className="mb-4 text-sm text-white/55">Select any extras you need. Items marked with <span className="inline-flex items-center gap-1 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-400"><Crown size={10} /> ADDITIONAL COST</span> will be quoted separately based on your selected package.</p>
+          <div className="grid gap-2.5 sm:grid-cols-2">
             {ADDONS.map((a) => {
               const on = addons.includes(a.id);
               return (
                 <button key={a.id} type="button" onClick={() => toggleAddon(a.id)}
-                  className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all ${on ? "border-brand-mint bg-brand-mint/10" : "border-white/8 bg-white/[0.02] hover:border-white/20"}`}>
-                  <span className={`grid h-5 w-5 shrink-0 place-items-center rounded border text-[10px] font-bold ${on ? "border-brand-mint bg-brand-mint text-ink" : "border-white/20 text-transparent"}`}>
+                  className={`flex items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all ${on ? "border-brand-mint bg-brand-mint/10" : "border-white/10 bg-white/[0.03] hover:border-white/25"}`}>
+                  <span className={`grid h-5 w-5 shrink-0 place-items-center rounded border text-[10px] font-bold ${on ? "border-brand-mint bg-brand-mint text-ink" : "border-white/25 text-transparent"}`}>
                     {on && <Check size={12} strokeWidth={3} />}
                   </span>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-sm font-medium ${on ? "text-white" : "text-white/75"}`}>{a.label}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className={`text-sm font-semibold ${on ? "text-white" : "text-white/80"}`}>{a.label}</span>
                       {a.premium && (
-                        <span className="inline-flex items-center gap-0.5 rounded bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-300">
+                        <span className="inline-flex items-center gap-0.5 rounded bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-400">
                           <Crown size={9} /> + Additional Cost
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-white/45">{a.desc}</p>
+                    <p className="text-xs text-white/50">{a.desc}</p>
                   </div>
                 </button>
               );
@@ -231,7 +222,7 @@ export default function LeadForm() {
             <div><label className={labelCls}>Service</label><Select value={f.service} onChange={(v) => set("service", v)} placeholder="Select a service" options={SERVICES} /></div>
             <div><label className={labelCls}>Main goal</label><Select value={f.goal} onChange={(v) => set("goal", v)} placeholder="Select goal" options={GOALS} /></div>
           </div>
-          <div className="mt-4"><label className={labelCls}>Target audience</label><textarea className={`${field} min-h-[70px] resize-y`} value={f.audience} onChange={(e) => set("audience", e.target.value)} placeholder="Who are your ideal customers?" /></div>
+          <div className="mt-4"><label className={labelCls}>Target audience</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.audience} onChange={(e) => set("audience", e.target.value)} placeholder="Who are your ideal customers?" /></div>
 
           {/* ── Brand ── */}
           <Divider>Brand &amp; Design</Divider>
@@ -240,25 +231,24 @@ export default function LeadForm() {
             <div><label className={labelCls}>Design style</label><Select value={f.style} onChange={(v) => set("style", v)} placeholder="Select style" options={STYLES} /></div>
           </div>
           <div className="mt-4"><label className={labelCls}>Brand colours</label><input className={field} value={f.colors} onChange={(e) => set("colors", e.target.value)} placeholder="e.g. Purple #8C00FF — or 'help me choose'" /></div>
-          <div className="mt-4"><label className={labelCls}>Inspiration websites</label><textarea className={`${field} min-h-[70px] resize-y`} value={f.inspo} onChange={(e) => set("inspo", e.target.value)} placeholder="2–3 links and what you like" /></div>
+          <div className="mt-4"><label className={labelCls}>Inspiration websites</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.inspo} onChange={(e) => set("inspo", e.target.value)} placeholder="2–3 links and what you like" /></div>
 
           {/* ── Pages ── */}
           <Divider>Pages You Need</Divider>
-          <p className="mb-3 text-xs text-white/50">Your {selectedPkg?.name || "—"} plan includes up to {selectedPkg?.pages || "—"} pages. Extra pages are available as an add-on.</p>
+          <p className="mb-3 text-sm text-white/55">Your {selectedPkg?.name || "—"} plan includes up to {selectedPkg?.pages || "—"} pages. Extra pages are available as an add-on.</p>
           <Pills options={PAGES} selected={f.pages} onToggle={togglePage} />
 
           <div className="mt-4"><label className={labelCls}>Homepage headline</label><input className={field} value={f.headline} onChange={(e) => set("headline", e.target.value)} placeholder="First thing visitors read" /></div>
-          <div className="mt-4"><label className={labelCls}>About your business</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.about} onChange={(e) => set("about", e.target.value)} placeholder="What you do, mission, story..." /></div>
-          <div className="mt-4"><label className={labelCls}>Anything else?</label><textarea className={`${field} min-h-[70px] resize-y`} value={f.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Deadlines, special requests..." /></div>
+          <div className="mt-4"><label className={labelCls}>About your business</label><textarea className={`${field} min-h-[90px] resize-y`} value={f.about} onChange={(e) => set("about", e.target.value)} placeholder="What you do, mission, story..." /></div>
+          <div className="mt-4"><label className={labelCls}>Anything else?</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Deadlines, special requests..." /></div>
 
-          {status === "error" && <p className="mt-5 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-2.5 text-sm text-red-300">{err}</p>}
+          {status === "error" && <p className="mt-5 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-base text-red-300">{err}</p>}
 
-          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-            <span className="text-xs text-white/40">🔒 Your information is secure and only used for your project.</span>
+          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+            <span className="text-sm text-white/45">🔒 Your information is secure and only used for your project.</span>
             <button onClick={submit} disabled={status === "sending"}
-              className="group inline-flex w-full items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-bold text-ink shadow-glow-mint transition-all hover:-translate-y-0.5 disabled:opacity-60 sm:w-auto"
-              style={{ background: "linear-gradient(100deg, var(--brand-mint), var(--brand-purple-light))" }}>
-              <Send size={16} /> {status === "sending" ? "Submitting..." : "Submit"}
+              className="inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-brand-mint px-8 py-4 text-base font-bold text-ink shadow-glow-mint transition-all hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60 sm:w-auto">
+              <Send size={18} /> {status === "sending" ? "Submitting..." : "Submit"}
             </button>
           </div>
         </div>
