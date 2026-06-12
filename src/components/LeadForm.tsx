@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send, CheckCircle2, Crown, ClipboardList, Palette, Code2, Rocket, Check } from "lucide-react";
+import { Send, CheckCircle2, Crown, ClipboardList, Palette, Code2, Rocket, Check, ShieldCheck } from "lucide-react";
 import { SERVICES } from "@/lib/services";
 
 const field = "w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder-white/35 outline-none transition-colors focus:border-brand-mint/60";
@@ -144,9 +144,9 @@ export default function LeadForm() {
       <div className="section">
 
         {/* ── Process steps ── */}
-        <div className="mx-auto mb-12 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="mx-auto mb-12 grid max-w-4xl grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           {STEPS.map((s) => (
-            <div key={s.title} className="rounded-2xl glass p-4 text-center">
+            <div key={s.title} className="rounded-2xl glass p-3 sm:p-4 text-center">
               <span className="mx-auto mb-2 grid h-10 w-10 place-items-center rounded-xl bg-brand-mint/10 text-brand-mint"><s.icon size={18} /></span>
               <div className="text-sm font-bold text-white">{s.title}</div>
               <p className="mt-1 text-xs leading-snug text-white/50">{s.desc}</p>
@@ -154,7 +154,15 @@ export default function LeadForm() {
           ))}
         </div>
 
-        <div className="mx-auto max-w-3xl rounded-3xl glass-strong p-6 sm:p-8">
+        <div className="mx-auto max-w-3xl rounded-3xl glass-strong p-5 sm:p-6 md:p-8">
+
+          {/* ── Pay-after note ── */}
+          <div className="mb-5 flex items-center gap-2 rounded-xl border border-brand-mint/30 bg-brand-mint/10 px-4 py-3 text-center sm:text-left">
+            <ShieldCheck size={18} className="hidden shrink-0 text-brand-mint sm:block" />
+            <p className="w-full text-xs font-semibold text-brand-mint sm:text-sm">
+              Pay after you are satisfied with your design — no payment is required to submit this form.
+            </p>
+          </div>
 
           {/* ── Step 1: Package ── */}
           <Divider>Choose Your Package</Divider>
