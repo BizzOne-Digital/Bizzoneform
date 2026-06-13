@@ -6,15 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, ExternalLink, MapPin } from "lucide-react";
 import Reviews from "@/components/Reviews";
 import LeadForm from "@/components/LeadForm";
-import ChatBot from "@/components/ChatBot";
 
-/* ── portfolio data ── */
+/* ── Issue 5 fix: removed "Certification" label from AEM Quality ISO ── */
 const PROJECTS = [
   { name: "M2M Pro", cat: "Business Platform", url: "https://www.m2mprocleaners.ca" },
   { name: "Cobb Church", cat: "Community", url: "https://www.cobbchurchnetwork.org" },
   { name: "A1 Furnished", cat: "Real Estate", url: "https://www.a1furnished.ca" },
   { name: "Global Paradon", cat: "Corporate", url: "https://www.globalpardonwaivers.com" },
-  { name: "AEM Quality ISO", cat: "Certification", url: "https://www.aemqualityiso.com" },
+  { name: "AEM Quality ISO", cat: "Quality Consulting", url: "https://www.aemqualityiso.com" },
   { name: "Bariis Pizza", cat: "Restaurant", url: "https://www.bariishalalpizza.com" },
   { name: "Corner Store", cat: "Retail", url: "https://www.cornerstoreatlinwood.com" },
   { name: "Toronto Notary", cat: "Local Business", url: "https://www.torontonotaryoffice.ca" },
@@ -67,7 +66,7 @@ export default function Home() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50">
+      <header className="relative z-10">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <a href="/" className="flex items-center gap-2.5">
             <Image src="/logo.png" alt="BizzOne Digital" width={36} height={36} className="rounded-lg" />
@@ -79,8 +78,8 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="relative pt-24 overflow-x-hidden">
-        {/* ── Hero: text left + portfolio right ── */}
+      <main className="relative overflow-x-hidden">
+        {/* ── Issue 2 fix: Hero — payment confirmed copy + new 5-step process ── */}
         <section className="relative py-10 sm:py-14">
           <div className="pointer-events-none absolute -top-10 left-1/2 h-72 w-[44rem] -translate-x-1/2 rounded-full bg-brand-purple/20 blur-[130px]" />
           <div className="section grid items-center gap-8 lg:grid-cols-2">
@@ -90,16 +89,15 @@ export default function Home() {
                 Get Started
               </span>
               <h1 className="mt-6 text-4xl font-extrabold leading-tight text-white sm:text-5xl">
-                Let&apos;s Build Your <span className="text-brand-mint">Website</span>
+                Let&apos;s Get Your Website Built.
               </h1>
               <p className="mt-5 max-w-lg text-base leading-relaxed text-white/70 sm:text-lg">
-                Choose your package, tell us about your project, and our team will get started within <span className="font-bold text-white">24–48 hours</span>.
+                Payment confirmed — you&apos;re all set.<br />
+                Fill out this short form so our team has everything they need to build your site. Takes about 5 minutes.
               </p>
-              <div className="mt-6 flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-2 text-base text-white/70">
-                  <MapPin size={18} className="text-brand-mint" />
-                  <span>Based in <strong className="text-white">Mississauga, Ontario</strong></span>
-                </div>
+              <div className="mt-6 flex items-center gap-2 text-base text-white/70">
+                <MapPin size={18} className="text-brand-mint" />
+                <span>Based in <strong className="text-white">Mississauga, Ontario</strong></span>
               </div>
               <p className="mt-2 text-base text-white/60">Trusted by businesses across <strong className="text-white">Canada</strong> and the <strong className="text-white">United States</strong>.</p>
             </div>
@@ -144,8 +142,6 @@ export default function Home() {
           <p className="mt-3 text-sm text-white/40">&copy; {new Date().getFullYear()} BizzOne Digital. All rights reserved.</p>
         </div>
       </footer>
-
-      <ChatBot />
     </>
   );
 }

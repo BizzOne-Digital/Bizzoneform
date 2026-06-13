@@ -1,29 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { Send, CheckCircle2, Crown, ClipboardList, Palette, Code2, Rocket, Check, ShieldCheck } from "lucide-react";
+import { Send, CheckCircle2, Crown, CreditCard, ClipboardList, Code2, Eye, Globe, Check, ShieldCheck } from "lucide-react";
 import { SERVICES } from "@/lib/services";
 
 const field = "w-full rounded-2xl border border-white/12 bg-white/[0.05] px-5 py-3.5 text-base text-white placeholder-white/40 outline-none transition-colors focus:border-brand-mint/60";
 const labelCls = "mb-2 block text-base font-semibold text-white/90";
 const darkOpt = { background: "#0f0a1a", color: "#e9e6f2" };
 
-/* ─── process steps ─── */
+/* ── Issue 2 fix: Updated 5-step process ── */
 const STEPS = [
-  { icon: ClipboardList, title: "1. Submit", desc: "Fill out this form with your project details." },
-  { icon: Palette, title: "2. Review", desc: "Our team reviews and reaches out within 24–48h." },
-  { icon: Code2, title: "3. Build", desc: "We design & develop your website to spec." },
-  { icon: Rocket, title: "4. Launch", desc: "Final review, revisions, and go live." },
+  { icon: CreditCard, title: "Payment Done", desc: "You're confirmed." },
+  { icon: ClipboardList, title: "Fill This Form", desc: "5 minutes." },
+  { icon: Code2, title: "We Build", desc: "Our team gets started." },
+  { icon: Eye, title: "You Review", desc: "See it before it goes live." },
+  { icon: Globe, title: "Go Live", desc: "We connect your domain." },
 ];
 
-/* ─── packages ─── */
+/* ── Issue 3 fix: packages are display-only, not clickable ── */
 type Pkg = { id: string; name: string; price: string; tagline: string; pages: number; includes: string[] };
 const PACKAGES: Pkg[] = [
   { id: "starter", name: "Starter", price: "$79", tagline: "Clean, professional website to get online fast.", pages: 5, includes: ["Up to 5 pages", "Contact form", "Mobile responsive", "Stock photos", "Basic on-page SEO"] },
   { id: "standard", name: "Standard", price: "$149", tagline: "Everything you need to grow and convert.", pages: 7, includes: ["Up to 7 pages", "Contact form", "Admin portal", "Gallery management", "Mobile responsive", "Blog / CMS ready"] },
 ];
 
-/* ─── add-ons ─── */
 type Addon = { id: string; label: string; desc: string; premium?: boolean };
 const ADDONS: Addon[] = [
   { id: "logo", label: "Logo Design", desc: "Professional logo crafted for your brand", premium: true },
@@ -79,7 +79,8 @@ function Select({ value, onChange, placeholder, options }: { value: string; onCh
 }
 
 export default function LeadForm() {
-  const [pkg, setPkg] = useState<string>("");
+  /* Issue 3: selectedPkg is the display-only selected package */
+  const [selectedPkgId, setSelectedPkgId] = useState<string>("");
   const [addons, setAddons] = useState<string[]>([]);
   const [f, setF] = useState({
     business: "", name: "", email: "", phone: "", site: "", social: "",
@@ -93,10 +94,11 @@ export default function LeadForm() {
   const togglePage = (v: string) => setF((p) => ({ ...p, pages: p.pages.includes(v) ? p.pages.filter((x) => x !== v) : [...p.pages, v] }));
   const toggleAddon = (id: string) => setAddons((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
 
-  const selectedPkg = PACKAGES.find((p) => p.id === pkg);
+  /* Issue 1 fix: selectedPkg properly derived so template string renders correctly */
+  const selectedPkg = PACKAGES.find((p) => p.id === selectedPkgId);
 
   const submit = async () => {
-    if (!pkg) { setStatus("error"); setErr("Please select a package first."); return; }
+    if (!selectedPkgId) { setStatus("error"); setErr("Please select your package first."); return; }
     if (!f.business || !f.name || !f.email || !f.phone) {
       setStatus("error"); setErr("Please fill in your business, name, email and phone."); return;
     }
@@ -141,46 +143,75 @@ export default function LeadForm() {
     <section className="relative py-12 sm:py-16">
       <div className="section">
 
-        {/* ── Process steps ── */}
-        <div className="mx-auto mb-12 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4">
+        {/* ── Issue 2 fix: 5-step process ── */}
+        <div className="mx-auto mb-12 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-5">
           {STEPS.map((s) => (
-            <div key={s.title} className="rounded-2xl glass p-6 text-center">
-              <span className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-xl bg-brand-mint/15 text-brand-mint"><s.icon size={28} /></span>
-              <div className="text-xl font-bold text-white">{s.title}</div>
-              <p className="mt-2 text-base leading-snug text-white">{s.desc}</p>
+            <div key={s.title} className="rounded-2xl glass p-5 text-center">
+              <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-xl bg-brand-mint/15 text-brand-mint"><s.icon size={24} /></span>
+              <div className="text-base font-bold text-white">{s.title}</div>
+              <p className="mt-1.5 text-sm leading-snug text-white/80">{s.desc}</p>
             </div>
           ))}
         </div>
 
         <div className="mx-auto max-w-3xl rounded-3xl glass-strong p-5 sm:p-8">
 
-      
+          {/* ── Issue 3 fix: YOUR SELECTED PACKAGE — display only ── */}
+          <Divider>Your Selected Package</Divider>
 
-          {/* ── Step 1: Package ── */}
-          <Divider>Choose Your Package</Divider>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {PACKAGES.map((p) => (
-              <button key={p.id} type="button" onClick={() => setPkg(p.id)}
-                className={`relative flex flex-col rounded-2xl p-5 text-left transition-all ${pkg === p.id ? "neon-border shadow-glow-purple" : "glass hover:shadow-glow-purple"}`}>
-                {pkg === p.id && <span className="absolute right-4 top-4 grid h-6 w-6 place-items-center rounded-full bg-brand-mint text-ink"><Check size={14} strokeWidth={3} /></span>}
-                <div className="text-sm font-bold uppercase tracking-wide text-brand-mint">{p.name}</div>
-                <div className="mt-1 flex items-end gap-1">
-                  <span className="text-4xl font-extrabold text-white">{p.price}</span>
-                  <span className="mb-1 text-sm text-white/50">one-time</span>
+          {/* Selector — client must confirm which package they purchased */}
+          {!selectedPkgId ? (
+            <>
+              <p className="mb-4 text-sm text-white/60">Please select the package you purchased to continue.</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {PACKAGES.map((p) => (
+                  <button key={p.id} type="button" onClick={() => setSelectedPkgId(p.id)}
+                    className="flex flex-col rounded-2xl glass p-5 text-left transition-all hover:shadow-glow-purple">
+                    <div className="text-sm font-bold uppercase tracking-wide text-brand-mint">{p.name}</div>
+                    <div className="mt-1 flex items-end gap-1">
+                      <span className="text-4xl font-extrabold text-white">{p.price}</span>
+                      <span className="mb-1 text-sm text-white/50">one-time</span>
+                    </div>
+                    <ul className="mt-3 space-y-2 border-t border-white/10 pt-3">
+                      {p.includes.map((it) => (
+                        <li key={it} className="flex items-center gap-2.5 text-sm text-white/70"><Check size={14} className="shrink-0 text-brand-mint" />{it}</li>
+                      ))}
+                    </ul>
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Display-only selected package */}
+              <div className="rounded-2xl neon-border p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-bold uppercase tracking-wide text-brand-mint">{selectedPkg?.name}</div>
+                    <div className="mt-1 flex items-end gap-1">
+                      <span className="text-4xl font-extrabold text-white">{selectedPkg?.price}</span>
+                      <span className="mb-1 text-sm text-white/50">one-time</span>
+                    </div>
+                  </div>
+                  <span className="grid h-8 w-8 place-items-center rounded-full bg-brand-mint text-ink"><Check size={16} strokeWidth={3} /></span>
                 </div>
-                <p className="mt-2 text-base text-white/60">{p.tagline}</p>
-                <ul className="mt-3 space-y-2 border-t border-white/10 pt-3">
-                  {p.includes.map((it) => (
-                    <li key={it} className="flex items-center gap-2.5 text-sm text-white/70"><Check size={14} className="shrink-0 text-brand-mint" />{it}</li>
+                <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-white/10 pt-3">
+                  {selectedPkg?.includes.map((it) => (
+                    <li key={it} className="flex items-center gap-2 text-sm text-white/70"><Check size={13} className="shrink-0 text-brand-mint" />{it}</li>
                   ))}
                 </ul>
-              </button>
-            ))}
-          </div>
+              </div>
+              <p className="mt-3 text-sm text-white/50">This reflects the package you purchased. Need to make a change? Reply to your confirmation message or contact us directly.</p>
+              <button onClick={() => setSelectedPkgId("")} className="mt-2 text-xs text-brand-mint underline">Change package</button>
+            </>
+          )}
 
           {/* ── Add-ons ── */}
           <Divider>Add-Ons</Divider>
-          <p className="mb-4 text-sm text-white/55">Select any extras you need. Items marked with <span className="inline-flex items-center gap-1 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-400"><Crown size={10} /> ADDITIONAL COST</span> will be quoted separately based on your selected package.</p>
+          {/* Issue 4 fix: pricing guidance note */}
+          <div className="mb-5 rounded-2xl border border-white/8 bg-white/[0.03] px-5 py-4 text-sm leading-relaxed text-white/70">
+            Select anything that applies to your project. Add-ons marked with <span className="inline-flex items-center gap-1 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-400"><Crown size={10} /> ADDITIONAL COST</span> will be reviewed by your project manager and quoted separately before any work begins. <strong className="text-white">You will not be charged without approval.</strong>
+          </div>
           <div className="grid gap-2.5 sm:grid-cols-2">
             {ADDONS.map((a) => {
               const on = addons.includes(a.id);
@@ -236,7 +267,12 @@ export default function LeadForm() {
 
           {/* ── Pages ── */}
           <Divider>Pages You Need</Divider>
-          <p className="mb-3 text-sm text-white/55">Your {selectedPkg?.name || "—"} plan includes up to {selectedPkg?.pages || "—"} pages. Extra pages are available as an add-on.</p>
+          {/* Issue 1 fix: dynamic variables now correctly render */}
+          <p className="mb-3 text-sm text-white/55">
+            {selectedPkg
+              ? `Your ${selectedPkg.name} plan includes up to ${selectedPkg.pages} pages. Extra pages are available as an add-on.`
+              : "Select your package above to see your page allowance."}
+          </p>
           <Pills options={PAGES} selected={f.pages} onToggle={togglePage} />
 
           <div className="mt-4"><label className={labelCls}>Homepage headline</label><input className={field} value={f.headline} onChange={(e) => set("headline", e.target.value)} placeholder="First thing visitors read" /></div>
