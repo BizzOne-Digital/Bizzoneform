@@ -283,9 +283,9 @@ export default function LeadForm() {
 
           {/* Project notice */}
           <div className="mt-8 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4 text-sm leading-relaxed text-white/70">
-            <p className="font-semibold text-amber-300">⚠ Please note:</p>
-            <p className="mt-2">We have limited project slots available, so we request that you stay available for the next <strong className="text-white">4–5 days</strong> after submitting this form for any required content, feedback, or approvals.</p>
-            <p className="mt-2">Delays in communication or missing information may affect the project timeline. If we do not receive the required details or responses on time, we may need to <strong className="text-white">pause/close your project</strong> and assign the slot to another client.</p>
+            <p className="font-semibold text-amber-300">⚠️ Please note:</p>
+            <p className="mt-2">We have limited project slots available, so we kindly ask that you remain available for the next <strong className="text-white">4–5 days</strong> after submitting this form for any content, feedback, or approvals needed.</p>
+            <p className="mt-2">To keep your project on track, prompt responses help us move quickly and deliver on time. If we are unable to reach you or receive the required details, your project may be <strong className="text-white">placed on hold</strong> until we hear back from you.</p>
           </div>
 
           <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
