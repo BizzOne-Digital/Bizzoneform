@@ -11,6 +11,8 @@ type Sub = {
   logo: string; colors: string; style: string; inspo: string;
   pages: string; headline: string; about: string; notes: string;
   status: Status; assigned_to: string; internal_notes: string;
+  services_list: string; pricing_details: string; has_pricing: string;
+  contact_page: string; special_offers: string; file_details: string;
 };
 
 const BADGE: Record<Status, string> = {
@@ -288,12 +290,18 @@ export default function DashboardUI() {
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/35">Project Details</p>
                 <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-1">
-                  <Row label="Goal"       value={selected.goal} />
-                  <Row label="Audience"   value={selected.audience} />
-                  <Row label="Pages"      value={selected.pages} />
-                  <Row label="Headline"   value={selected.headline} />
-                  <Row label="About"      value={selected.about} />
-                  <Row label="Notes"      value={selected.notes} />
+                  <Row label="Goal"            value={selected.goal} />
+                  <Row label="Audience"        value={selected.audience} />
+                  <Row label="Pages"           value={selected.pages} />
+                  <Row label="Headline"        value={selected.headline} />
+                  <Row label="About"           value={selected.about} />
+                  <Row label="Services List"   value={selected.services_list} />
+                  <Row label="Pricing Details" value={selected.pricing_details} />
+                  <Row label="Has Pricing"     value={selected.has_pricing} />
+                  <Row label="Contact Page"    value={selected.contact_page} />
+                  <Row label="Special Offers"  value={selected.special_offers} />
+                  <Row label="File Details"    value={selected.file_details} />
+                  <Row label="Notes"           value={selected.notes} />
                 </div>
               </div>
 
