@@ -2,10 +2,17 @@
   "name": "bizzone-leads",
   "version": "1.0.0",
   "private": true,
-  "scripts": { "dev": "next dev", "build": "next build", "start": "next start" },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "framer-motion": "^11.18.0",
+    "jose": "^6.2.3",
     "lucide-react": "^0.469.0",
+    "mongodb": "^7.3.0",
     "next": "^15.3.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"

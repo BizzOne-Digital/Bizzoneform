@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import ChatBot from "@/components/ChatBot";
 
 export const metadata: Metadata = {
   title: "Get Started | BizzOne Digital",
@@ -29,6 +30,7 @@ export default function RootLayout({
         <div className="bg-space" />
         <div className="bg-grid" />
         {children}
+        <ChatBot />
       </body>
     </html>
   );

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Send, CheckCircle2, Crown, CreditCard, ClipboardList, Code2, Eye, Globe, Check, ShieldCheck } from "lucide-react";
-import { SERVICES } from "@/lib/services";
 
 const field = "w-full rounded-2xl border border-white/12 bg-white/[0.05] px-5 py-3.5 text-base text-white placeholder-white/40 outline-none transition-colors focus:border-brand-mint/60";
 const labelCls = "mb-2 block text-base font-semibold text-white/90";
@@ -84,9 +83,11 @@ export default function LeadForm() {
   const [addons, setAddons] = useState<string[]>([]);
   const [f, setF] = useState({
     business: "", name: "", email: "", phone: "", site: "", social: "",
-    service: "", goal: "", audience: "",
+    goal: "", audience: "",
     logo: "", colors: "", style: "", inspo: "",
-    pages: [] as string[], headline: "", about: "", notes: "",
+    pages: [] as string[], headline: "", about: "",
+    servicesList: "", pricingDetails: "", hasPricing: "", contactPageInfo: "",
+    specialOffers: "", fileDetails: "", notes: "",
   });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [err, setErr] = useState("");
@@ -251,7 +252,6 @@ export default function LeadForm() {
           {/* ── Project ── */}
           <Divider>Project Details</Divider>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div><label className={labelCls}>Service</label><Select value={f.service} onChange={(v) => set("service", v)} placeholder="Select a service" options={SERVICES} /></div>
             <div><label className={labelCls}>Main goal</label><Select value={f.goal} onChange={(v) => set("goal", v)} placeholder="Select goal" options={GOALS} /></div>
           </div>
           <div className="mt-4"><label className={labelCls}>Target audience</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.audience} onChange={(e) => set("audience", e.target.value)} placeholder="Who are your ideal customers?" /></div>
@@ -277,6 +277,15 @@ export default function LeadForm() {
 
           <div className="mt-4"><label className={labelCls}>Homepage headline</label><input className={field} value={f.headline} onChange={(e) => set("headline", e.target.value)} placeholder="First thing visitors read" /></div>
           <div className="mt-4"><label className={labelCls}>About your business</label><textarea className={`${field} min-h-[90px] resize-y`} value={f.about} onChange={(e) => set("about", e.target.value)} placeholder="What you do, mission, story..." /></div>
+          <div className="mt-4"><label className={labelCls}>Services — List your services with details</label><textarea className={`${field} min-h-[90px] resize-y`} value={f.servicesList} onChange={(e) => set("servicesList", e.target.value)} placeholder="e.g. Web Design — $500, Consulting — $100/hr..." /></div>
+          <div className="mt-4"><label className={labelCls}>Contact Page — What contact details should be shown?</label><textarea className={`${field} min-h-[70px] resize-y`} value={f.contactPageInfo} onChange={(e) => set("contactPageInfo", e.target.value)} placeholder="Phone, email, address, hours to display on site..." /></div>
+          <div className="mt-4"><label className={labelCls}>Do you have pricing details to show?</label><Select value={f.hasPricing} onChange={(v) => set("hasPricing", v)} placeholder="Select" options={["Yes — display prices", "No — contact for pricing", "Starting price range only"]} /></div>
+          {f.hasPricing === "Yes — display prices" || f.hasPricing === "Starting price range only" ? (
+            <div className="mt-4"><label className={labelCls}>If yes, please provide the pricing details</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.pricingDetails} onChange={(e) => set("pricingDetails", e.target.value)} placeholder="List your prices or price ranges..." /></div>
+          ) : null}
+          <div className="mt-4"><label className={labelCls}>Products / Pricing — Provide product information and pricing</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.pricingDetails} onChange={(e) => set("pricingDetails", e.target.value)} placeholder="Products with descriptions and prices..." /></div>
+          <div className="mt-4"><label className={labelCls}>Any special offers or packages to include?</label><textarea className={`${field} min-h-[70px] resize-y`} value={f.specialOffers} onChange={(e) => set("specialOffers", e.target.value)} placeholder="e.g. Buy 2 get 1 free, seasonal discounts..." /></div>
+          <div className="mt-4"><label className={labelCls}>Notes / file details</label><textarea className={`${field} min-h-[70px] resize-y`} value={f.fileDetails} onChange={(e) => set("fileDetails", e.target.value)} placeholder="Notes about any files, images, documents you will provide..." /></div>
           <div className="mt-4"><label className={labelCls}>Anything else?</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Deadlines, special requests..." /></div>
 
           {status === "error" && <p className="mt-5 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-base text-red-300">{err}</p>}
