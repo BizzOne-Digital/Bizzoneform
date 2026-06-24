@@ -13,20 +13,17 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   const { password } = await req.json();
 
-  const hash    = (process.env.DASHBOARD_PASSWORD_HASH || "").trim();
-  const plainPw = (process.env.DASHBOARD_PASSWORD || "").trim();
+  const hash    = String(process.env.DASHBOARD_PASSWORD_HASH ?? "").trim();
+  const plainPw = String(process.env.DASHBOARD_PASSWORD ?? "").trim();
 
   let valid = false;
 
-  if (plainPw && password === plainPw) {
-    // Plain text password from env (easiest setup)
+  if (plainPw.length > 0 && password === plainPw) {
     valid = true;
-  } else if (hash && hash.startsWith("$2")) {
-    // Bcrypt hash from env
-    try { valid = await bcrypt.compare(password, hash); }
+  } else if (hash.length > 0 && hash[0] === "$") {
+    try { valid = await bcrypt.compare(String(password), hash); }
     catch (e) { console.error("bcrypt error:", e); }
-  } else if (password === "bizzone2024") {
-    // Default fallback if nothing set in env
+  } else if (String(password) === "bizzone2024") {
     valid = true;
   }
 
