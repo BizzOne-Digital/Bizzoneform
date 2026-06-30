@@ -99,10 +99,46 @@ export default function LeadForm() {
   const selectedPkg = PACKAGES.find((p) => p.id === selectedPkgId);
 
   const submit = async () => {
+    // Package validation
     if (!selectedPkgId) { setStatus("error"); setErr("Please select your package first."); return; }
+    
+    // Business details validation
     if (!f.business || !f.name || !f.email || !f.phone) {
-      setStatus("error"); setErr("Please fill in your business, name, email and phone."); return;
+      setStatus("error"); setErr("Please fill in all your business details (Business name, Contact person, Email, Phone)."); return;
     }
+    if (!f.site) { setStatus("error"); setErr("Please enter your current website."); return; }
+    if (!f.social) { setStatus("error"); setErr("Please enter your social media handles."); return; }
+    
+    // Project details validation
+    if (!f.goal) { setStatus("error"); setErr("Please select your main business goal."); return; }
+    if (!f.audience) { setStatus("error"); setErr("Please describe your target audience."); return; }
+    
+    // Brand & Design validation
+    if (!f.logo) { setStatus("error"); setErr("Please select a logo option."); return; }
+    if (!f.style) { setStatus("error"); setErr("Please select a design style."); return; }
+    if (!f.colors) { setStatus("error"); setErr("Please enter your brand colours."); return; }
+    if (!f.inspo) { setStatus("error"); setErr("Please provide inspiration websites (2-3 links)."); return; }
+    
+    // Pages validation
+    if (f.pages.length === 0) { setStatus("error"); setErr("Please select at least one page for your website."); return; }
+    if (!f.headline) { setStatus("error"); setErr("Please enter your homepage headline."); return; }
+    if (!f.about) { setStatus("error"); setErr("Please describe your business."); return; }
+    
+    // Services & Contact validation
+    if (!f.servicesList) { setStatus("error"); setErr("Please list your services with details."); return; }
+    if (!f.contactPageInfo) { setStatus("error"); setErr("Please provide contact page information."); return; }
+    
+    // Pricing validation
+    if (!f.hasPricing) { setStatus("error"); setErr("Please select a pricing option."); return; }
+    if ((f.hasPricing === "Yes — display prices" || f.hasPricing === "Starting price range only") && !f.pricingDetails) {
+      setStatus("error"); setErr("Please provide your pricing details."); return;
+    }
+    
+    // Additional details validation
+    if (!f.specialOffers) { setStatus("error"); setErr("Please enter your special offers or packages information."); return; }
+    if (!f.fileDetails) { setStatus("error"); setErr("Please provide notes or file details information."); return; }
+    if (!f.notes) { setStatus("error"); setErr("Please provide any additional notes or requirements."); return; }
+    
     setStatus("sending"); setErr("");
     try {
       const addonLabels = addons.map((id) => ADDONS.find((a) => a.id === id)?.label || id);
@@ -245,25 +281,25 @@ export default function LeadForm() {
             <div><label className={labelCls}>Contact person <span className="text-brand-mint">*</span></label><input className={field} value={f.name} onChange={(e) => set("name", e.target.value)} placeholder="First and last name" /></div>
             <div><label className={labelCls}>Email <span className="text-brand-mint">*</span></label><input type="email" className={field} value={f.email} onChange={(e) => set("email", e.target.value)} placeholder="you@business.com" /></div>
             <div><label className={labelCls}>Phone <span className="text-brand-mint">*</span></label><input type="tel" className={field} value={f.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+1 (___) ___-____" /></div>
-            <div><label className={labelCls}>Current website</label><input type="url" className={field} value={f.site} onChange={(e) => set("site", e.target.value)} placeholder="https://..." /></div>
-            <div><label className={labelCls}>Social media</label><input className={field} value={f.social} onChange={(e) => set("social", e.target.value)} placeholder="Instagram, Facebook..." /></div>
+            <div><label className={labelCls}>Current website <span className="text-brand-mint">*</span></label><input type="url" className={field} value={f.site} onChange={(e) => set("site", e.target.value)} placeholder="https://..." /></div>
+            <div><label className={labelCls}>Social media <span className="text-brand-mint">*</span></label><input className={field} value={f.social} onChange={(e) => set("social", e.target.value)} placeholder="Instagram, Facebook..." /></div>
           </div>
 
           {/* ── Project ── */}
           <Divider>Project Details</Divider>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div><label className={labelCls}>Main goal</label><Select value={f.goal} onChange={(v) => set("goal", v)} placeholder="Select goal" options={GOALS} /></div>
+            <div><label className={labelCls}>Main goal <span className="text-brand-mint">*</span></label><Select value={f.goal} onChange={(v) => set("goal", v)} placeholder="Select goal" options={GOALS} /></div>
           </div>
-          <div className="mt-4"><label className={labelCls}>Target audience</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.audience} onChange={(e) => set("audience", e.target.value)} placeholder="Who are your ideal customers?" /></div>
+          <div className="mt-4"><label className={labelCls}>Target audience <span className="text-brand-mint">*</span></label><textarea className={`${field} min-h-[80px] resize-y`} value={f.audience} onChange={(e) => set("audience", e.target.value)} placeholder="Who are your ideal customers?" /></div>
 
           {/* ── Brand ── */}
           <Divider>Brand &amp; Design</Divider>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div><label className={labelCls}>Logo</label><Select value={f.logo} onChange={(v) => set("logo", v)} placeholder="Select" options={LOGO_OPTS} /></div>
-            <div><label className={labelCls}>Design style</label><Select value={f.style} onChange={(v) => set("style", v)} placeholder="Select style" options={STYLES} /></div>
+            <div><label className={labelCls}>Logo <span className="text-brand-mint">*</span></label><Select value={f.logo} onChange={(v) => set("logo", v)} placeholder="Select" options={LOGO_OPTS} /></div>
+            <div><label className={labelCls}>Design style <span className="text-brand-mint">*</span></label><Select value={f.style} onChange={(v) => set("style", v)} placeholder="Select style" options={STYLES} /></div>
           </div>
-          <div className="mt-4"><label className={labelCls}>Brand colours</label><input className={field} value={f.colors} onChange={(e) => set("colors", e.target.value)} placeholder="e.g. Purple #8C00FF — or 'help me choose'" /></div>
-          <div className="mt-4"><label className={labelCls}>Inspiration websites</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.inspo} onChange={(e) => set("inspo", e.target.value)} placeholder="2–3 links and what you like" /></div>
+          <div className="mt-4"><label className={labelCls}>Brand colours <span className="text-brand-mint">*</span></label><input className={field} value={f.colors} onChange={(e) => set("colors", e.target.value)} placeholder="e.g. Purple #8C00FF — or 'help me choose'" /></div>
+          <div className="mt-4"><label className={labelCls}>Inspiration websites <span className="text-brand-mint">*</span></label><textarea className={`${field} min-h-[80px] resize-y`} value={f.inspo} onChange={(e) => set("inspo", e.target.value)} placeholder="2–3 links and what you like" /></div>
 
           {/* ── Pages ── */}
           <Divider>Pages You Need</Divider>
@@ -273,20 +309,21 @@ export default function LeadForm() {
               ? `Your ${selectedPkg.name} plan includes up to ${selectedPkg.pages} pages. Extra pages are available as an add-on.`
               : "Select your package above to see your page allowance."}
           </p>
+          <label className={labelCls}>Select pages <span className="text-brand-mint">*</span></label>
           <Pills options={PAGES} selected={f.pages} onToggle={togglePage} />
 
-          <div className="mt-4"><label className={labelCls}>Homepage headline</label><input className={field} value={f.headline} onChange={(e) => set("headline", e.target.value)} placeholder="First thing visitors read" /></div>
-          <div className="mt-4"><label className={labelCls}>About your business</label><textarea className={`${field} min-h-[90px] resize-y`} value={f.about} onChange={(e) => set("about", e.target.value)} placeholder="What you do, mission, story..." /></div>
-          <div className="mt-4"><label className={labelCls}>Services — List your services with details</label><textarea className={`${field} min-h-[90px] resize-y`} value={f.servicesList} onChange={(e) => set("servicesList", e.target.value)} placeholder="e.g. Web Design — $500, Consulting — $100/hr..." /></div>
-          <div className="mt-4"><label className={labelCls}>Contact Page — What contact details should be shown?</label><textarea className={`${field} min-h-[70px] resize-y`} value={f.contactPageInfo} onChange={(e) => set("contactPageInfo", e.target.value)} placeholder="Phone, email, address, hours to display on site..." /></div>
-          <div className="mt-4"><label className={labelCls}>Do you have pricing details to show?</label><Select value={f.hasPricing} onChange={(v) => set("hasPricing", v)} placeholder="Select" options={["Yes — display prices", "No — contact for pricing", "Starting price range only"]} /></div>
+          <div className="mt-4"><label className={labelCls}>Homepage headline <span className="text-brand-mint">*</span></label><input className={field} value={f.headline} onChange={(e) => set("headline", e.target.value)} placeholder="First thing visitors read" /></div>
+          <div className="mt-4"><label className={labelCls}>About your business <span className="text-brand-mint">*</span></label><textarea className={`${field} min-h-[90px] resize-y`} value={f.about} onChange={(e) => set("about", e.target.value)} placeholder="What you do, mission, story..." /></div>
+          <div className="mt-4"><label className={labelCls}>Services — List your services with details <span className="text-brand-mint">*</span></label><textarea className={`${field} min-h-[90px] resize-y`} value={f.servicesList} onChange={(e) => set("servicesList", e.target.value)} placeholder="e.g. Web Design — $500, Consulting — $100/hr..." /></div>
+          <div className="mt-4"><label className={labelCls}>Contact Page — What contact details should be shown? <span className="text-brand-mint">*</span></label><textarea className={`${field} min-h-[70px] resize-y`} value={f.contactPageInfo} onChange={(e) => set("contactPageInfo", e.target.value)} placeholder="Phone, email, address, hours to display on site..." /></div>
+          <div className="mt-4"><label className={labelCls}>Do you have pricing details to show? <span className="text-brand-mint">*</span></label><Select value={f.hasPricing} onChange={(v) => set("hasPricing", v)} placeholder="Select" options={["Yes — display prices", "No — contact for pricing", "Starting price range only"]} /></div>
           {f.hasPricing === "Yes — display prices" || f.hasPricing === "Starting price range only" ? (
-            <div className="mt-4"><label className={labelCls}>If yes, please provide the pricing details</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.pricingDetails} onChange={(e) => set("pricingDetails", e.target.value)} placeholder="List your prices or price ranges..." /></div>
+            <div className="mt-4"><label className={labelCls}>If yes, please provide the pricing details <span className="text-brand-mint">*</span></label><textarea className={`${field} min-h-[80px] resize-y`} value={f.pricingDetails} onChange={(e) => set("pricingDetails", e.target.value)} placeholder="List your prices or price ranges..." /></div>
           ) : null}
           <div className="mt-4"><label className={labelCls}>Products / Pricing — Provide product information and pricing</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.pricingDetails} onChange={(e) => set("pricingDetails", e.target.value)} placeholder="Products with descriptions and prices..." /></div>
-          <div className="mt-4"><label className={labelCls}>Any special offers or packages to include?</label><textarea className={`${field} min-h-[70px] resize-y`} value={f.specialOffers} onChange={(e) => set("specialOffers", e.target.value)} placeholder="e.g. Buy 2 get 1 free, seasonal discounts..." /></div>
-          <div className="mt-4"><label className={labelCls}>Notes / file details</label><textarea className={`${field} min-h-[70px] resize-y`} value={f.fileDetails} onChange={(e) => set("fileDetails", e.target.value)} placeholder="Notes about any files, images, documents you will provide..." /></div>
-          <div className="mt-4"><label className={labelCls}>Anything else?</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Deadlines, special requests..." /></div>
+          <div className="mt-4"><label className={labelCls}>Any special offers or packages to include? <span className="text-brand-mint">*</span></label><textarea className={`${field} min-h-[70px] resize-y`} value={f.specialOffers} onChange={(e) => set("specialOffers", e.target.value)} placeholder="e.g. Buy 2 get 1 free, seasonal discounts..." /></div>
+          <div className="mt-4"><label className={labelCls}>Notes / file details <span className="text-brand-mint">*</span></label><textarea className={`${field} min-h-[70px] resize-y`} value={f.fileDetails} onChange={(e) => set("fileDetails", e.target.value)} placeholder="Notes about any files, images, documents you will provide..." /></div>
+          <div className="mt-4"><label className={labelCls}>Anything else? <span className="text-brand-mint">*</span></label><textarea className={`${field} min-h-[80px] resize-y`} value={f.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Deadlines, special requests..." /></div>
 
           {status === "error" && <p className="mt-5 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-base text-red-300">{err}</p>}
 

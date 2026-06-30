@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 // POST → login
 // GET  → fetch submissions (auth required)
 // PATCH → update submission (auth required)
-// DELETE → logout
+// DELETE → delete submission (auth required) OR logout (if no id)
 
 export async function POST(req: Request) {
   const { password } = await req.json();
@@ -84,7 +84,24 @@ export async function PATCH(req: Request) {
   return NextResponse.json({ ...result, id: result._id.toString(), _id: undefined });
 }
 
-export async function DELETE() {
+export async function DELETE(req: Request) {
+  const body = await req.json().catch(() => ({}));
+  const { id } = body;
+
+  // If ID is provided, delete the specific submission
+  if (id) {
+    if (!(await isAuthenticated())) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const col = await getSubmissions();
+    const result = await col.deleteOne({ _id: new ObjectId(id) });
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  // Otherwise, logout (remove auth cookie)
   const res = NextResponse.json({ ok: true });
   res.cookies.delete("bz_auth");
   return res;

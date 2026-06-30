@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Search, LogOut, RefreshCw, X } from "lucide-react";
+import { Search, LogOut, RefreshCw, X, Trash2 } from "lucide-react";
 
 type Status = "new" | "in_progress" | "done" | "on_hold";
 type Sub = {
@@ -57,6 +57,8 @@ export default function DashboardUI() {
   const [eStatus, setEStatus] = useState<Status>("new");
   const [eAssign, setEAssign] = useState("");
   const [eNotes, setENotes]   = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -92,6 +94,22 @@ export default function DashboardUI() {
       setEStatus(updated.status);
     }
     setSaving(false);
+  };
+
+  const deleteSubmission = async () => {
+    if (!selected) return;
+    setDeleting(true);
+    const res = await fetch("/api/submissions", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: selected.id }),
+    });
+    if (res.ok) {
+      setSubs(p => p.filter(s => s.id !== selected.id));
+      setSelected(null);
+      setShowDeleteConfirm(false);
+    }
+    setDeleting(false);
   };
 
   const logout = async () => {
@@ -263,7 +281,30 @@ export default function DashboardUI() {
                   className="w-full rounded-full bg-[#C8F31D] py-2.5 text-sm font-bold text-black transition-all hover:brightness-110 disabled:opacity-60">
                   {saving ? "Saving..." : "Save Changes"}
                 </button>
+                <button onClick={() => setShowDeleteConfirm(true)} disabled={deleting}
+                  className="w-full rounded-full bg-red-500/20 border border-red-500/30 py-2.5 text-sm font-bold text-red-400 transition-all hover:bg-red-500/30 disabled:opacity-60">
+                  <Trash2 size={14} className="inline mr-2" />
+                  Delete Form
+                </button>
               </div>
+
+              {/* Delete confirmation */}
+              {showDeleteConfirm && (
+                <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 space-y-3">
+                  <p className="text-sm font-semibold text-red-300">Are you sure?</p>
+                  <p className="text-xs text-red-200/80">This will permanently delete this submission and cannot be undone.</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => setShowDeleteConfirm(false)} disabled={deleting}
+                      className="flex-1 rounded-full border border-white/20 py-2 text-sm font-semibold text-white/70 transition-all hover:bg-white/5 disabled:opacity-60">
+                      Cancel
+                    </button>
+                    <button onClick={deleteSubmission} disabled={deleting}
+                      className="flex-1 rounded-full bg-red-500 py-2 text-sm font-bold text-white transition-all hover:bg-red-600 disabled:opacity-60">
+                      {deleting ? "Deleting..." : "Delete"}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Contact */}
               <div>
