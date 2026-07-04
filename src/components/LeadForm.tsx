@@ -9,11 +9,11 @@ const darkOpt = { background: "#0f0a1a", color: "#e9e6f2" };
 
 /* ── Issue 2 fix: Updated 5-step process ── */
 const STEPS = [
-  { icon: CreditCard, title: "Payment Done", desc: "You're confirmed." },
-  { icon: ClipboardList, title: "Fill This Form", desc: "5 minutes." },
-  { icon: Code2, title: "We Build", desc: "Our team gets started." },
-  { icon: Eye, title: "You Review", desc: "See it before it goes live." },
-  { icon: Globe, title: "Go Live", desc: "We connect your domain." },
+  { icon: CreditCard, title: "Payment Confirmed", desc: "Your order is secured." },
+  { icon: ClipboardList, title: "Share Your Details", desc: "Complete the quick form." },
+  { icon: Code2, title: "We Start Building", desc: "Our team begins your website." },
+  { icon: Eye, title: "Review & Approve", desc: "Check the final preview." },
+  { icon: Globe, title: "Website Goes Live", desc: "We connect your domain." },
 ];
 
 /* ── Issue 3 fix: packages are display-only, not clickable ── */
@@ -327,11 +327,12 @@ export default function LeadForm() {
 
           {status === "error" && <p className="mt-5 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-base text-red-300">{err}</p>}
 
-          {/* Project notice */}
+          {/* Project Timeline Note */}
           <div className="mt-8 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4 text-sm leading-relaxed text-white/70">
-            <p className="font-semibold text-amber-300">⚠️ Please note:</p>
-            <p className="mt-2">We have limited project slots available, so we kindly ask that you remain available for the next <strong className="text-white">4–5 days</strong> after submitting this form for any content, feedback, or approvals needed.</p>
-            <p className="mt-2">To keep your project on track, prompt responses help us move quickly and deliver on time. If we are unable to reach you or receive the required details, your project may be <strong className="text-white">placed on hold</strong> until we hear back from you.</p>
+            <p className="font-semibold text-amber-300">⚠️ Project Timeline Note</p>
+            <p className="mt-2">Your website will be completed within <strong className="text-white">10–15 business days</strong> once we receive all required content and approvals.</p>
+            <p className="mt-2">To help us keep your project moving smoothly, please share your content such as text, images, logo, and business details as early as possible. We may also reach out during the process for quick feedback or approvals. If required content or feedback is delayed, the project timeline may be extended. Project slots are reserved for <strong className="text-white">10–15 days</strong>, and if the timeline needs to be extended to <strong className="text-white">25–30 days</strong>, a small <strong className="text-white">$10 extension fee</strong> may apply.</p>
+            <p className="mt-2">Thank you for helping us keep everything on track and delivered on time.</p>
           </div>
 
           <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
