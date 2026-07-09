@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send, CheckCircle2, Crown, CreditCard, ClipboardList, Code2, Eye, Globe, Check, ShieldCheck } from "lucide-react";
+import { Send, CheckCircle2, Crown, CreditCard, ClipboardList, Code2, Eye, Globe, Check, ShieldCheck, Upload, X } from "lucide-react";
 
 const field = "w-full rounded-2xl border border-white/12 bg-white/[0.05] px-5 py-3.5 text-base text-white placeholder-white/40 outline-none transition-colors focus:border-brand-mint/60";
 const labelCls = "mb-2 block text-base font-semibold text-white/90";
@@ -91,6 +91,25 @@ export default function LeadForm() {
   });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [err, setErr] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoError, setLogoError] = useState("");
+
+  const uploadLogoFile = async (file: File) => {
+    setLogoUploading(true);
+    setLogoError("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/lead/upload-logo", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed");
+      setLogoUrl(data.url);
+    } catch (e) {
+      setLogoError(e instanceof Error ? e.message : "Upload failed. Please try again.");
+    }
+    setLogoUploading(false);
+  };
   const set = (k: string, v: string) => { setF((p) => ({ ...p, [k]: v })); if (status === "error") setStatus("idle"); };
   const togglePage = (v: string) => setF((p) => ({ ...p, pages: p.pages.includes(v) ? p.pages.filter((x) => x !== v) : [...p.pages, v] }));
   const toggleAddon = (id: string) => setAddons((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
@@ -115,6 +134,7 @@ export default function LeadForm() {
     
     // Brand & Design validation
     if (!f.logo) { setStatus("error"); setErr("Please select a logo option."); return; }
+    if (f.logo === "Yes — I'll upload it" && !logoUrl) { setStatus("error"); setErr("Please upload your logo file."); return; }
     if (!f.style) { setStatus("error"); setErr("Please select a design style."); return; }
     if (!f.colors) { setStatus("error"); setErr("Please enter your brand colours."); return; }
     if (!f.inspo) { setStatus("error"); setErr("Please provide inspiration websites (2-3 links)."); return; }
@@ -150,6 +170,7 @@ export default function LeadForm() {
           package: selectedPkg ? `${selectedPkg.name} (${selectedPkg.price})` : "",
           addons: addonLabels,
           pages: f.pages,
+          logo_url: logoUrl,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -298,6 +319,32 @@ export default function LeadForm() {
             <div><label className={labelCls}>Logo <span className="text-brand-mint">*</span></label><Select value={f.logo} onChange={(v) => set("logo", v)} placeholder="Select" options={LOGO_OPTS} /></div>
             <div><label className={labelCls}>Design style <span className="text-brand-mint">*</span></label><Select value={f.style} onChange={(v) => set("style", v)} placeholder="Select style" options={STYLES} /></div>
           </div>
+
+          {f.logo === "Yes — I'll upload it" && (
+            <div className="mt-4">
+              <label className={labelCls}>Upload your logo file <span className="text-brand-mint">*</span></label>
+              {logoUrl ? (
+                <div className="flex items-center gap-3 rounded-2xl border border-white/12 bg-white/[0.05] p-3">
+                  <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-white/10">
+                    <img src={logoUrl} alt="Uploaded logo" className="h-full w-full object-contain" />
+                  </div>
+                  <span className="flex-1 text-sm text-white/70">Logo uploaded successfully</span>
+                  <button type="button" onClick={() => setLogoUrl("")} className="grid h-8 w-8 place-items-center rounded-lg text-white/40 hover:text-white">
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <label className={`flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-white/20 py-6 text-sm text-white/60 hover:border-brand-mint/50 hover:text-white ${logoUploading ? "opacity-60" : ""}`}>
+                  <Upload size={16} />
+                  {logoUploading ? "Uploading..." : "Click to choose a file (PNG, JPG, SVG, WEBP — max 5MB)"}
+                  <input type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" className="hidden" disabled={logoUploading}
+                    onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadLogoFile(file); e.target.value = ""; }} />
+                </label>
+              )}
+              {logoError && <p className="mt-2 text-xs text-red-400">{logoError}</p>}
+            </div>
+          )}
+
           <div className="mt-4"><label className={labelCls}>Brand colours <span className="text-brand-mint">*</span></label><input className={field} value={f.colors} onChange={(e) => set("colors", e.target.value)} placeholder="e.g. Purple #8C00FF — or 'help me choose'" /></div>
           <div className="mt-4"><label className={labelCls}>Inspiration websites <span className="text-brand-mint">*</span></label><textarea className={`${field} min-h-[80px] resize-y`} value={f.inspo} onChange={(e) => set("inspo", e.target.value)} placeholder="2–3 links and what you like" /></div>
 

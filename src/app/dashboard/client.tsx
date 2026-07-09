@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { Search, LogOut, RefreshCw, X, Trash2 } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { Search, LogOut, RefreshCw, X, Trash2, Upload } from "lucide-react";
 
 type Status = "new" | "in_progress" | "done" | "on_hold";
 type Sub = {
   id: string; created_at: string; business: string; name: string;
   email: string; phone: string; package: string; addons: string;
   site: string; social: string; goal: string; audience: string;
-  logo: string; colors: string; style: string; inspo: string;
+  logo: string; logo_url?: string; colors: string; style: string; inspo: string;
   pages: string; headline: string; about: string; notes: string;
   status: Status; assigned_to: string; internal_notes: string;
   services_list: string; pricing_details: string; has_pricing: string;
@@ -59,6 +59,9 @@ export default function DashboardUI() {
   const [eNotes, setENotes]   = useState("");
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -110,6 +113,51 @@ export default function DashboardUI() {
       setShowDeleteConfirm(false);
     }
     setDeleting(false);
+  };
+
+  const uploadLogo = async (file: File) => {
+    if (!selected) return;
+    setUploading(true);
+    setUploadError("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const upRes = await fetch("/api/upload-logo", { method: "POST", body: fd });
+      const upData = await upRes.json();
+      if (!upRes.ok) throw new Error(upData.error || "Upload failed");
+
+      const res = await fetch("/api/submissions", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selected.id, status: eStatus, assigned_to: eAssign, internal_notes: eNotes, logo_url: upData.url }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setSubs(p => p.map(s => s.id === updated.id ? updated : s));
+        setSelected(updated);
+      } else {
+        throw new Error("Could not save logo");
+      }
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload failed");
+    }
+    setUploading(false);
+  };
+
+  const removeLogo = async () => {
+    if (!selected) return;
+    setUploading(true);
+    const res = await fetch("/api/submissions", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: selected.id, status: eStatus, assigned_to: eAssign, internal_notes: eNotes, logo_url: "" }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setSubs(p => p.map(s => s.id === updated.id ? updated : s));
+      setSelected(updated);
+    }
+    setUploading(false);
   };
 
   const logout = async () => {
@@ -349,8 +397,38 @@ export default function DashboardUI() {
               {/* Brand */}
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/35">Brand & Design</p>
-                <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-1">
-                  <Row label="Logo"        value={selected.logo} />
+                <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 space-y-3">
+                  <div>
+                    <p className="mb-2 text-xs text-white/40">Client Logo</p>
+                    {selected.logo_url ? (
+                      <div className="flex items-center gap-3">
+                        <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                          <img src={selected.logo_url} alt="Client logo" className="h-full w-full object-contain" />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                            className="rounded-full border border-white/15 px-3 py-1.5 text-xs font-semibold text-white/70 hover:text-white disabled:opacity-60">
+                            {uploading ? "Uploading..." : "Replace"}
+                          </button>
+                          <button onClick={removeLogo} disabled={uploading}
+                            className="rounded-full border border-red-500/30 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 disabled:opacity-60">
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 py-4 text-sm text-white/50 hover:border-[#C8F31D]/40 hover:text-white disabled:opacity-60">
+                        <Upload size={14} />
+                        {uploading ? "Uploading..." : "Upload Logo"}
+                      </button>
+                    )}
+                    <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                      className="hidden"
+                      onChange={e => { const f = e.target.files?.[0]; if (f) uploadLogo(f); e.target.value = ""; }} />
+                    {uploadError && <p className="mt-2 text-xs text-red-400">{uploadError}</p>}
+                  </div>
+                  <Row label="Logo Notes"  value={selected.logo} />
                   <Row label="Colours"     value={selected.colors} />
                   <Row label="Style"       value={selected.style} />
                   <Row label="Inspiration" value={selected.inspo} />

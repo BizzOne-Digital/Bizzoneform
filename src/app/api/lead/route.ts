@@ -33,6 +33,7 @@ export async function POST(req: Request) {
         goal:           v(d.goal),
         audience:       v(d.audience),
         logo:           v(d.logo),
+        logo_url:       String(d.logo_url || "").trim(),
         colors:         v(d.colors),
         style:          v(d.style),
         inspo:          v(d.inspo),
