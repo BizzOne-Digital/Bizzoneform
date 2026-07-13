@@ -21,7 +21,7 @@ const FLOW: Record<string, Node> = {
   },
 
   packages: {
-    text: "We offer two website packages — both are one-time payments with no monthly fees:\n\n⭐ Starter — $79 (one-time)\n• Up to 5 pages\n• Mobile responsive\n• SEO optimised from day one\n• Contact form to your email\n• Free hosting for 1 year\n• Custom coded — no templates\n\n🚀 Standard — $149 (one-time)\n• Up to 15 pages\n• Full admin portal\n• eCommerce ready (up to 50 products)\n• Customer portal\n• Payment system\n• Free hosting for 1 year\n\nBoth include 24–48hr delivery and a 30-day money-back guarantee.",
+    text: "We offer three website packages — all are one-time payments with no monthly fees:\n\n⭐ Standard — $79 (one-time)\n• Up to 5 pages\n• Mobile responsive\n• SEO optimised from day one\n• Contact form to your email\n• Free hosting for 1 year\n• Custom coded — no templates\n\n🚀 Premium — $149 (one-time)\n• Up to 7 pages\n• Full admin portal\n• Gallery management\n• Blog / CMS ready\n• Free hosting for 1 year\n\n🏆 Advanced — $299 (one-time)\n• Up to 10 pages\n• Admin & customer portal\n• eCommerce ready (up to 50 products)\n• Payment system\n• Advanced SEO setup\n• Free hosting for 1 year\n\nAll include 24–48hr delivery and a 30-day money-back guarantee.",
     options: [
       { label: "What's the difference?", next: "pkg-diff" },
       { label: "⏱ How long does it take?", next: "turnaround" },
@@ -32,7 +32,7 @@ const FLOW: Record<string, Node> = {
   },
 
   "pkg-diff": {
-    text: "Here's the key difference:\n\n📄 Starter ($79) — Up to 5 pages, static site. Perfect for small businesses who need a clean, professional online presence. No self-editing — our team handles updates.\n\n🛒 Standard ($149) — Up to 15 pages with a full admin portal so you can manage content, products, and images yourself. Includes eCommerce, customer portal, and payment system.\n\nBoth are one-time payments — no monthly platform fees, no ongoing costs (just hosting renewal after year 1).",
+    text: "Here's the key difference:\n\n📄 Standard ($79) — Up to 5 pages, static site. Perfect for small businesses who need a clean, professional online presence. No self-editing — our team handles updates.\n\n🖼 Premium ($149) — Up to 7 pages with a full admin portal so you can manage content and images yourself, plus gallery management and blog/CMS.\n\n🛒 Advanced ($299) — Up to 10 pages with admin & customer portals, eCommerce (up to 50 products), payment system, and advanced SEO setup.\n\nAll are one-time payments — no monthly platform fees, no ongoing costs (just hosting renewal after year 1).",
     options: [
       { label: "📦 See full packages", next: "packages" },
       { label: "🔧 What add-ons are available?", next: "addons" },

@@ -19,8 +19,9 @@ const STEPS = [
 /* ── Issue 3 fix: packages are display-only, not clickable ── */
 type Pkg = { id: string; name: string; price: string; tagline: string; pages: number; includes: string[] };
 const PACKAGES: Pkg[] = [
-  { id: "starter", name: "Starter", price: "$79", tagline: "Clean, professional website to get online fast.", pages: 5, includes: ["Up to 5 pages", "Contact form", "Mobile responsive", "Stock photos", "Basic on-page SEO"] },
-  { id: "standard", name: "Standard", price: "$149", tagline: "Everything you need to grow and convert.", pages: 7, includes: ["Up to 7 pages", "Contact form", "Admin portal", "Gallery management", "Mobile responsive", "Blog / CMS ready"] },
+  { id: "standard", name: "Standard", price: "$79", tagline: "Clean, professional website to get online fast.", pages: 5, includes: ["Up to 5 pages", "Contact form", "Stock photos", "Mobile responsive", "Basic on-page SEO"] },
+  { id: "premium", name: "Premium", price: "$149", tagline: "More pages and essential integrations for growing businesses.", pages: 12, includes: ["Up to 12 pages", "Contact form", "Admin Portal", "Booking / appointment form", "Payment integration setup", "Gallery management", "Mobile responsive + SEO setup"] },
+  { id: "advanced", name: "Advanced", price: "$299", tagline: "Custom eCommerce website with products, payments, and business features.", pages: 15, includes: ["Up to 15 pages", "eCommerce ready", "Upload up to 50+ products", "Custom website design", "Payment gateway integration", "Order management setup", "Admin dashboard", "Basic automation features"] },
 ];
 
 type Addon = { id: string; label: string; desc: string; premium?: boolean };
@@ -221,15 +222,19 @@ export default function LeadForm() {
           {!selectedPkgId ? (
             <>
               <p className="mb-4 text-sm text-white/60">Please select the package you purchased to continue.</p>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-3">
                 {PACKAGES.map((p) => (
                   <button key={p.id} type="button" onClick={() => setSelectedPkgId(p.id)}
-                    className="flex flex-col rounded-2xl glass p-5 text-left transition-all hover:shadow-glow-purple">
+                    className="relative flex flex-col rounded-2xl glass p-5 text-left transition-all hover:shadow-glow-purple">
+                    {p.id === "premium" && (
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-mint px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-ink">Most Popular</span>
+                    )}
                     <div className="text-sm font-bold uppercase tracking-wide text-brand-mint">{p.name}</div>
                     <div className="mt-1 flex items-end gap-1">
                       <span className="text-4xl font-extrabold text-white">{p.price}</span>
                       <span className="mb-1 text-sm text-white/50">one-time</span>
                     </div>
+                    <p className="mt-2 text-sm text-white/60">{p.tagline}</p>
                     <ul className="mt-3 space-y-2 border-t border-white/10 pt-3">
                       {p.includes.map((it) => (
                         <li key={it} className="flex items-center gap-2.5 text-sm text-white/70"><Check size={14} className="shrink-0 text-brand-mint" />{it}</li>

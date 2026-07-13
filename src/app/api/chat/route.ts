@@ -7,7 +7,7 @@ const SYSTEM = `You are BizzOne Digital's friendly AI assistant on the website o
 Key info:
 - Company: BizzOne Digital — AI Automation & Digital Growth Agency based in Mississauga, Ontario
 - We serve businesses across Canada and the United States
-- Website packages: Starter ($79, up to 5 pages), Standard ($149, up to 7 pages with admin portal)
+- Website packages: Standard ($79, up to 5 pages), Premium ($149, up to 7 pages with admin portal), Advanced ($299, up to 10 pages with admin & customer portal, eCommerce, payment system)
 - Add-ons available at extra cost: Logo design, domain, extra pages, customer portal, payment integration, eCommerce, booking system, CRM integration, multi-language, custom design
 - Process: 1) Client fills the form 2) We build in 24-48hrs 3) Client reviews & approves 4) Pay after satisfied 5) Site goes live
 - Payment: Pay AFTER you are satisfied with your design. No upfront payment required to submit the form.
@@ -29,13 +29,13 @@ export async function POST(req: Request) {
       const lower = message.toLowerCase();
       let reply = "Thanks for reaching out! For detailed information, please fill out the form above or visit bizzonedigital.com. Our team will get back to you within 24-48 hours.";
       if (lower.includes("price") || lower.includes("cost") || lower.includes("how much")) {
-        reply = "Our Starter package is $79 (up to 5 pages) and Standard is $149 (up to 7 pages with admin portal). Add-ons like logo design, eCommerce, and payment integration are available at extra cost. You only pay after you're satisfied with the design!";
+        reply = "Our Standard package is $79 (up to 5 pages), Premium is $149 (up to 7 pages with admin portal), and Advanced is $299 (up to 10 pages with admin & customer portal, eCommerce, and payment system). Add-ons like logo design and multi-language are available at extra cost. You only pay after you're satisfied with the design!";
       } else if (lower.includes("payment") || lower.includes("pay")) {
         reply = "You only pay after you are satisfied with your design. No upfront payment is required to submit the form. Once you approve, we'll send a secure payment link.";
       } else if (lower.includes("how long") || lower.includes("timeline") || lower.includes("time")) {
         reply = "Once you submit the form, our team starts building within 24-48 hours. You'll review and approve the design, and your site goes live shortly after — often within hours of approval.";
-      } else if (lower.includes("package") || lower.includes("plan") || lower.includes("starter") || lower.includes("standard")) {
-        reply = "We offer two main packages: Starter ($79) with up to 5 pages, contact form, mobile responsive design, and basic SEO. Standard ($149) includes up to 7 pages, admin portal, gallery management, and blog/CMS. Add-ons are available for extra features.";
+      } else if (lower.includes("package") || lower.includes("plan") || lower.includes("standard") || lower.includes("premium") || lower.includes("advanced")) {
+        reply = "We offer three main packages: Standard ($79) with up to 5 pages, contact form, mobile responsive design, and basic SEO. Premium ($149) includes up to 7 pages, admin portal, gallery management, and blog/CMS. Advanced ($299) includes up to 10 pages, admin & customer portal, eCommerce, and payment system. Add-ons are available for extra features.";
       } else if (lower.includes("add-on") || lower.includes("addon") || lower.includes("extra") || lower.includes("logo") || lower.includes("ecommerce")) {
         reply = "We offer add-ons including: Logo Design, Domain Purchase, Extra Pages, Admin/Customer Portal, Payment Integration, eCommerce, Booking System, Email Newsletter, CRM Integration, Multi-Language, and Fully Custom Design. Each is quoted separately based on your package.";
       } else if (lower.includes("where") || lower.includes("location") || lower.includes("based")) {
