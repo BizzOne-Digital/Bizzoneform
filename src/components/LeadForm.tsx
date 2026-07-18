@@ -213,7 +213,7 @@ export default function LeadForm() {
           ))}
         </div>
 
-        <div className="mx-auto max-w-3xl rounded-3xl glass-strong p-5 sm:p-8">
+        <div className="mx-auto mb-8 max-w-5xl rounded-3xl glass-strong p-5 sm:p-8">
 
           {/* ── Issue 3 fix: YOUR SELECTED PACKAGE — display only ── */}
           <Divider>Your Selected Package</Divider>
@@ -268,6 +268,9 @@ export default function LeadForm() {
               <button onClick={() => setSelectedPkgId("")} className="mt-2 text-xs text-brand-mint underline">Change package</button>
             </>
           )}
+        </div>
+
+        <div className="mx-auto max-w-3xl rounded-3xl glass-strong p-5 sm:p-8">
 
           {/* ── Add-ons ── */}
           <Divider>Add-Ons</Divider>
