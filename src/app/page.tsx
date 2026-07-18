@@ -13,10 +13,34 @@ const PROJECTS = [
   { name: "Cobb Church", cat: "Community", url: "https://www.cobbchurchnetwork.org" },
   { name: "A1 Furnished", cat: "Real Estate", url: "https://www.a1furnished.ca" },
   { name: "Global Paradon", cat: "Corporate", url: "https://www.globalpardonwaivers.com" },
-  { name: "AEM Quality ISO", cat: "Quality Consulting", url: "https://www.aemqualityiso.com" },
   { name: "Bariis Pizza", cat: "Restaurant", url: "https://www.bariishalalpizza.com" },
-  { name: "Corner Store", cat: "Retail", url: "https://www.cornerstoreatlinwood.com" },
-  { name: "Toronto Notary", cat: "Local Business", url: "https://www.torontonotaryoffice.ca" },
+  
+  { name: "Little Sunshine ECLC", cat: "Childcare", url: "https://www.littlesunshineeclc.ca" },
+  { name: "The Royal Georgetown", cat: "Real Estate", url: "https://www.theroyalgeorgetown.ca" },
+  { name: "Perfect Touch Auto Detailing", cat: "Automotive", url: "https://www.perfecttouchautodetailing.company" },
+  { name: "Smoka Blunt", cat: "Retail", url: "https://www.smokablunt.com" },
+  { name: "Stride Shockey Sales", cat: "Retail", url: "https://www.strideshockeysales.com" },
+  { name: "Dial4Bottle", cat: "Delivery", url: "https://www.dial4bottle.com" },
+  { name: "Haven Customs", cat: "Logistics", url: "https://www.havencustoms.ca" },
+  { name: "ML Cleaning", cat: "Cleaning Services", url: "https://www.mlcleaninghs.com" },
+  { name: "Ono Poke Bar", cat: "Restaurant", url: "https://onopokebar.onlineorders.store" },
+  { name: "Ono Poke Bar Georgetown", cat: "Restaurant", url: "https://onopokebar-georgetown.onlineorders.store" },
+  { name: "Ono Poke Bar Etobicoke", cat: "Restaurant", url: "https://onopokebar-etobicoke.onlineorders.store" },
+  { name: "Ono Poke Bar St. Clair", cat: "Restaurant", url: "https://onopokebar-stclair.onlineorders.store" },
+  { name: "Awok", cat: "Restaurant", url: "https://awok.onlineorders.store" },
+  { name: "Mascot Chinese", cat: "Restaurant", url: "https://mascotchinese.onlineorders.store" },
+  { name: "Watami Japanese", cat: "Restaurant", url: "https://watamijapanees.onlineorders.store" },
+  { name: "The Village Burger", cat: "Restaurant", url: "https://thevillageburger.onlineorders.store" },
+  { name: "Merchant Orders", cat: "Business Platform", url: "https://merchantorders.io" },
+  { name: "Canadian Robots", cat: "Technology", url: "https://www.canadianrobots.io" },
+  { name: "Niagara Pet Waste Removal", cat: "Local Business", url: "https://niagarapetwasteremoval.ca" },
+  { name: "Lupin Project Group", cat: "Corporate", url: "http://lupinprojectgroup.com" },
+  { name: "Black Trucks Co", cat: "Logistics", url: "https://blacktrucksco.com" },
+  { name: "Blue River Logistics", cat: "Logistics", url: "https://www.blueriverlogistics.com" },
+  { name: "Junk Pro Service", cat: "Local Business", url: "https://junkproservice.com" },
+  { name: "Pranvue", cat: "Corporate", url: "https://www.pranvue.com" },
+  { name: "Moon Homeopathy", cat: "Healthcare", url: "https://www.moonhomeopathy.com" },
+  { name: "Walking Little Star Daycare", cat: "Childcare", url: "https://walkinglittlestardaycare.com" },
 ];
 const BASE_W = 1440;
 
@@ -58,7 +82,7 @@ export default function Home() {
 
   useEffect(() => {
     if (paused) return;
-    const id = setInterval(() => setActive((a) => (a + 1) % n), 3500);
+    const id = setInterval(() => setActive((a) => (a + 1) % n), 10000);
     return () => clearInterval(id);
   }, [paused, n]);
 
