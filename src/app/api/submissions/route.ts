@@ -10,6 +10,27 @@ export const runtime = "nodejs";
 // PATCH → update submission (auth required)
 // DELETE → delete submission (auth required) OR logout (if no id)
 
+function currentMonth() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// Any site whose domain isn't connected yet auto-rolls forward to the current
+// month, so incomplete work never stays stuck on a past month.
+async function rollOverIncompleteMonths(col: Awaited<ReturnType<typeof getSubmissions>>) {
+  const cm = currentMonth();
+
+  await col.updateMany(
+    { $or: [{ target_month: { $exists: false } }, { target_month: "" }] },
+    [{ $set: { target_month: { $substrCP: ["$created_at", 0, 7] } } }]
+  );
+
+  await col.updateMany(
+    { domain_connected: { $ne: true }, target_month: { $lt: cm } },
+    { $set: { target_month: cm } }
+  );
+}
+
 export async function POST(req: Request) {
   const { password } = await req.json();
 
@@ -52,17 +73,39 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status");
   const search = searchParams.get("search");
+  const month = searchParams.get("month"); // "YYYY-MM"
+  const domainConnected = searchParams.get("domain_connected"); // "true" | "false"
 
-  const col   = await getSubmissions();
+  const col = await getSubmissions();
+  await rollOverIncompleteMonths(col);
+
   const query: Record<string, unknown> = {};
   if (status && status !== "all") query.status = status;
-  if (search) {
-    query.$or = [
-      { business: { $regex: search, $options: "i" } },
-      { name:     { $regex: search, $options: "i" } },
-      { email:    { $regex: search, $options: "i" } },
-    ];
+  if (domainConnected === "true") query.domain_connected = true;
+  if (domainConnected === "false") query.domain_connected = { $ne: true };
+  if (month) {
+    // target_month falls back to the created_at month when not explicitly set
+    query.$monthFilter = {
+      $or: [
+        { target_month: month },
+        { target_month: { $in: [null, ""] }, created_at: { $regex: `^${month}` } },
+      ],
+    };
   }
+  if (search) {
+    query.$searchFilter = {
+      $or: [
+        { business: { $regex: search, $options: "i" } },
+        { name:     { $regex: search, $options: "i" } },
+        { email:    { $regex: search, $options: "i" } },
+      ],
+    };
+  }
+  // Merge the two $or clauses into a single $and so both filters apply together
+  const andClauses: unknown[] = [];
+  if (query.$monthFilter) { andClauses.push(query.$monthFilter); delete query.$monthFilter; }
+  if (query.$searchFilter) { andClauses.push(query.$searchFilter); delete query.$searchFilter; }
+  if (andClauses.length) query.$and = andClauses;
   const docs = await col.find(query).sort({ created_at: -1 }).toArray();
   return NextResponse.json(docs.map(d => ({ ...d, id: d._id.toString(), _id: undefined })));
 }
@@ -71,11 +114,13 @@ export async function PATCH(req: Request) {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { id, status, assigned_to, internal_notes, logo_url } = await req.json();
+  const { id, status, assigned_to, internal_notes, logo_url, target_month, domain_connected } = await req.json();
   if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
   const update: Record<string, unknown> = { status, assigned_to, internal_notes };
   if (logo_url !== undefined) update.logo_url = logo_url;
+  if (target_month !== undefined) update.target_month = target_month;
+  if (domain_connected !== undefined) update.domain_connected = domain_connected;
 
   const col = await getSubmissions();
   const result = await col.findOneAndUpdate(

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Search, LogOut, RefreshCw, X, Trash2, Upload } from "lucide-react";
+import { Search, LogOut, RefreshCw, X, Trash2, Upload, ChevronLeft, ChevronRight, Download, Globe } from "lucide-react";
 
 type Status = "new" | "in_progress" | "done" | "on_hold";
 type Sub = {
@@ -13,7 +13,52 @@ type Sub = {
   status: Status; assigned_to: string; internal_notes: string;
   services_list: string; pricing_details: string; has_pricing: string;
   contact_page: string; special_offers: string; file_details: string;
+  target_month?: string; domain_connected?: boolean;
 };
+
+type ViewMode = "all" | "month" | "domain_month";
+
+function currentMonth() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function shiftMonth(month: string, delta: number) {
+  const [y, m] = month.split("-").map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function monthLabel(month: string) {
+  const [y, m] = month.split("-").map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString("en-CA", { month: "long", year: "numeric" });
+}
+
+function subMonth(s: Sub) {
+  return s.target_month || s.created_at.slice(0, 7);
+}
+
+function toCSV(rows: Sub[]) {
+  const headers = ["Business", "Contact Name", "Email", "Phone", "Package", "Status", "Target Month", "Domain Connected", "Submitted", "Assigned To"];
+  const lines = [headers.join(",")];
+  for (const s of rows) {
+    const vals = [
+      s.business, s.name, s.email, s.phone, s.package, LABEL[s.status],
+      subMonth(s), s.domain_connected ? "Yes" : "No", fmt(s.created_at), s.assigned_to || "",
+    ].map(v => `"${String(v ?? "").replace(/"/g, '""')}"`);
+    lines.push(vals.join(","));
+  }
+  return lines.join("\n");
+}
+
+function downloadCSV(rows: Sub[], filename: string) {
+  const blob = new Blob([toCSV(rows)], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
 
 const BADGE: Record<Status, string> = {
   new:         "bg-[#C8F31D]/15 text-[#C8F31D]",
@@ -52,11 +97,15 @@ export default function DashboardUI() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState("");
   const [filter, setFilter]   = useState("all");
+  const [view, setView]       = useState<ViewMode>("all");
+  const [month, setMonth]     = useState(currentMonth());
   const [selected, setSelected] = useState<Sub | null>(null);
   const [saving, setSaving]   = useState(false);
   const [eStatus, setEStatus] = useState<Status>("new");
   const [eAssign, setEAssign] = useState("");
   const [eNotes, setENotes]   = useState("");
+  const [eMonth, setEMonth]   = useState(currentMonth());
+  const [eDomain, setEDomain] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -68,10 +117,12 @@ export default function DashboardUI() {
     const p = new URLSearchParams();
     if (filter !== "all") p.set("status", filter);
     if (search) p.set("search", search);
+    if (view === "month" || view === "domain_month") p.set("month", month);
+    if (view === "domain_month") p.set("domain_connected", "true");
     const res = await fetch(`/api/submissions?${p}`);
     if (res.ok) setSubs(await res.json());
     setLoading(false);
-  }, [filter, search]);
+  }, [filter, search, view, month]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -80,23 +131,62 @@ export default function DashboardUI() {
     setEStatus(s.status);
     setEAssign(s.assigned_to || "");
     setENotes(s.internal_notes || "");
+    setEMonth(subMonth(s));
+    setEDomain(!!s.domain_connected);
   };
 
-  const save = async () => {
+  const save = async (overrides: Partial<{ target_month: string; domain_connected: boolean }> = {}) => {
     if (!selected) return;
     setSaving(true);
+    const body = {
+      id: selected.id, status: eStatus, assigned_to: eAssign, internal_notes: eNotes,
+      target_month: eMonth, domain_connected: eDomain, ...overrides,
+    };
     const res = await fetch("/api/submissions", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: selected.id, status: eStatus, assigned_to: eAssign, internal_notes: eNotes }),
+      body: JSON.stringify(body),
     });
     if (res.ok) {
       const updated = await res.json();
       setSubs(p => p.map(s => s.id === updated.id ? updated : s));
       setSelected(updated);
       setEStatus(updated.status);
+      setEMonth(subMonth(updated));
+      setEDomain(!!updated.domain_connected);
     }
     setSaving(false);
+  };
+
+  const shiftSelectedMonth = async (delta: number) => {
+    if (!selected) return;
+    const newMonth = shiftMonth(eMonth, delta);
+    setEMonth(newMonth);
+    setSaving(true);
+    const res = await fetch("/api/submissions", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: selected.id, status: eStatus, assigned_to: eAssign, internal_notes: eNotes, target_month: newMonth, domain_connected: eDomain }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setSubs(p => p.map(s => s.id === updated.id ? updated : s));
+      setSelected(updated);
+    }
+    setSaving(false);
+  };
+
+  const toggleDomainConnected = async (s: Sub) => {
+    const res = await fetch("/api/submissions", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: s.id, status: s.status, assigned_to: s.assigned_to, internal_notes: s.internal_notes, domain_connected: !s.domain_connected }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setSubs(p => p.map(x => x.id === updated.id ? updated : x));
+      if (selected?.id === updated.id) { setSelected(updated); setEDomain(!!updated.domain_connected); }
+    }
   };
 
   const deleteSubmission = async () => {
@@ -179,6 +269,12 @@ export default function DashboardUI() {
     { k: "on_hold",     l: "On Hold" },
   ];
 
+  const VIEWS: { k: ViewMode; l: string }[] = [
+    { k: "all",          l: "All Websites" },
+    { k: "month",        l: "This Month" },
+    { k: "domain_month", l: "Domain Connected" },
+  ];
+
   return (
     <div className="flex min-h-screen flex-col bg-[#05060A]">
 
@@ -193,6 +289,10 @@ export default function DashboardUI() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={() => downloadCSV(subs, `bizzone-websites-${view}-${view === "all" ? "all" : month}.csv`)}
+            className="flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/50 hover:text-white">
+            <Download size={12} /> Generate Report
+          </button>
           <button onClick={load} className="grid h-8 w-8 place-items-center rounded-lg text-white/40 hover:text-white">
             <RefreshCw size={14} />
           </button>
@@ -206,7 +306,27 @@ export default function DashboardUI() {
 
         {/* Sidebar */}
         <aside className="hidden w-48 shrink-0 border-r border-white/6 p-4 lg:block">
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-white/30">Status</p>
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-white/30">View</p>
+          {VIEWS.map(v => (
+            <button key={v.k} onClick={() => setView(v.k)}
+              className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm mb-1 transition-all ${view === v.k ? "bg-white/8 text-white font-semibold" : "text-white/50 hover:text-white hover:bg-white/4"}`}>
+              {v.l}
+            </button>
+          ))}
+
+          {(view === "month" || view === "domain_month") && (
+            <div className="mt-2 mb-4 flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-2 py-2">
+              <button onClick={() => setMonth(m => shiftMonth(m, -1))} className="grid h-6 w-6 place-items-center rounded-lg text-white/40 hover:text-white">
+                <ChevronLeft size={14} />
+              </button>
+              <span className="text-[11px] font-semibold text-white/70">{monthLabel(month)}</span>
+              <button onClick={() => setMonth(m => shiftMonth(m, 1))} className="grid h-6 w-6 place-items-center rounded-lg text-white/40 hover:text-white">
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          )}
+
+          <p className="mb-3 mt-4 text-[10px] font-semibold uppercase tracking-widest text-white/30">Status</p>
           {FILTERS.map(f => (
             <button key={f.k} onClick={() => setFilter(f.k)}
               className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm mb-1 transition-all ${filter === f.k ? "bg-white/8 text-white font-semibold" : "text-white/50 hover:text-white hover:bg-white/4"}`}>
@@ -262,7 +382,7 @@ export default function DashboardUI() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/6">
-                      {["Business", "Contact", "Package", "Date", "Status", ""].map(h => (
+                      {["Business", "Contact", "Package", "Month", "Domain", "Status", ""].map(h => (
                         <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-white/35">{h}</th>
                       ))}
                     </tr>
@@ -281,7 +401,13 @@ export default function DashboardUI() {
                           <div className="text-xs text-white/40">{s.email}</div>
                         </td>
                         <td className="px-4 py-3 text-white/60">{s.package || "—"}</td>
-                        <td className="px-4 py-3 text-xs text-white/45">{fmt(s.created_at)}</td>
+                        <td className="px-4 py-3 text-xs text-white/45">{monthLabel(subMonth(s))}</td>
+                        <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+                          <button onClick={() => toggleDomainConnected(s)}
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase transition-colors ${s.domain_connected ? "bg-green-500/15 text-green-400" : "bg-white/8 text-white/40"}`}>
+                            <Globe size={10} /> {s.domain_connected ? "Connected" : "Not Connected"}
+                          </button>
+                        </td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${BADGE[s.status]}`}>
                             {LABEL[s.status]}
@@ -325,7 +451,26 @@ export default function DashboardUI() {
                   value={eAssign} onChange={e => setEAssign(e.target.value)} placeholder="Assigned to (team member)" />
                 <textarea className="w-full rounded-xl border border-white/10 bg-[#05060A] min-h-[70px] resize-y px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-[#C8F31D]/50"
                   value={eNotes} onChange={e => setENotes(e.target.value)} placeholder="Internal notes..." />
-                <button onClick={save} disabled={saving}
+
+                <div>
+                  <p className="mb-1.5 text-xs text-white/40">Target Month</p>
+                  <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#05060A] px-3 py-2">
+                    <button onClick={() => shiftSelectedMonth(-1)} disabled={saving} className="grid h-7 w-7 place-items-center rounded-lg text-white/40 hover:text-white disabled:opacity-40">
+                      <ChevronLeft size={14} />
+                    </button>
+                    <span className="text-sm font-semibold text-white">{monthLabel(eMonth)}</span>
+                    <button onClick={() => shiftSelectedMonth(1)} disabled={saving} className="grid h-7 w-7 place-items-center rounded-lg text-white/40 hover:text-white disabled:opacity-40">
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                </div>
+
+                <button onClick={() => setEDomain(v => !v)}
+                  className={`flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-semibold transition-all ${eDomain ? "border-green-500/30 bg-green-500/15 text-green-400" : "border-white/10 bg-white/[0.02] text-white/50"}`}>
+                  <Globe size={14} /> Domain {eDomain ? "Connected" : "Not Connected"}
+                </button>
+
+                <button onClick={() => save()} disabled={saving}
                   className="w-full rounded-full bg-[#C8F31D] py-2.5 text-sm font-bold text-black transition-all hover:brightness-110 disabled:opacity-60">
                   {saving ? "Saving..." : "Save Changes"}
                 </button>
