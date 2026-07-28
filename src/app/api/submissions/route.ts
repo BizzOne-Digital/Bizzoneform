@@ -25,8 +25,10 @@ async function rollOverIncompleteMonths(col: Awaited<ReturnType<typeof getSubmis
     [{ $set: { target_month: { $substrCP: ["$created_at", 0, 7] } } }]
   );
 
+  // Only still-active work (not "done") rolls forward — finished projects keep
+  // whatever month they were delivered in, even if domain was never marked connected.
   await col.updateMany(
-    { domain_connected: { $ne: true }, target_month: { $lt: cm } },
+    { domain_connected: { $ne: true }, status: { $ne: "done" }, target_month: { $lt: cm } },
     { $set: { target_month: cm } }
   );
 }

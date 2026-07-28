@@ -70,6 +70,8 @@ const LABEL: Record<Status, string> = {
   new: "New", in_progress: "In Progress", done: "Done", on_hold: "On Hold"
 };
 
+const TEAM = ["Zubair", "Shumaila", "Preety"];
+
 function fmt(d: string) {
   return new Date(d).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
 }
@@ -382,7 +384,7 @@ export default function DashboardUI() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/6">
-                      {["Business", "Contact", "Package", "Month", "Domain", "Status", ""].map(h => (
+                      {["Business", "Contact", "Package", "Date", "Month", "Domain", "Assigned", "Status", ""].map(h => (
                         <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-white/35">{h}</th>
                       ))}
                     </tr>
@@ -401,6 +403,7 @@ export default function DashboardUI() {
                           <div className="text-xs text-white/40">{s.email}</div>
                         </td>
                         <td className="px-4 py-3 text-white/60">{s.package || "—"}</td>
+                        <td className="px-4 py-3 text-xs text-white/45">{fmt(s.created_at)}</td>
                         <td className="px-4 py-3 text-xs text-white/45">{monthLabel(subMonth(s))}</td>
                         <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                           <button onClick={() => toggleDomainConnected(s)}
@@ -408,6 +411,7 @@ export default function DashboardUI() {
                             <Globe size={10} /> {s.domain_connected ? "Connected" : "Not Connected"}
                           </button>
                         </td>
+                        <td className="px-4 py-3 text-white/60">{s.assigned_to || "—"}</td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${BADGE[s.status]}`}>
                             {LABEL[s.status]}
@@ -447,8 +451,11 @@ export default function DashboardUI() {
                   value={eStatus} onChange={e => setEStatus(e.target.value as Status)}>
                   {Object.entries(LABEL).map(([v, l]) => <option key={v} value={v} style={{ background: "#05060A" }}>{l}</option>)}
                 </select>
-                <input className="w-full rounded-xl border border-white/10 bg-[#05060A] px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-[#C8F31D]/50"
-                  value={eAssign} onChange={e => setEAssign(e.target.value)} placeholder="Assigned to (team member)" />
+                <select className="w-full rounded-xl border border-white/10 bg-[#05060A] px-4 py-2.5 text-sm text-white outline-none focus:border-[#C8F31D]/50"
+                  value={eAssign} onChange={e => setEAssign(e.target.value)}>
+                  <option value="" style={{ background: "#05060A" }}>Unassigned</option>
+                  {TEAM.map(t => <option key={t} value={t} style={{ background: "#05060A" }}>{t}</option>)}
+                </select>
                 <textarea className="w-full rounded-xl border border-white/10 bg-[#05060A] min-h-[70px] resize-y px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none focus:border-[#C8F31D]/50"
                   value={eNotes} onChange={e => setENotes(e.target.value)} placeholder="Internal notes..." />
 
