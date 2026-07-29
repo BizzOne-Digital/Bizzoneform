@@ -74,11 +74,11 @@ const TEAM = ["Zubair", "Shumaila", "Preety"];
 
 const PACKAGES = ["Standard ($79)", "Premium ($149)", "Advanced ($299)"];
 
-// Per-site commission paid to the assigned developer once the domain is connected.
-// Advanced isn't counted — no fixed commission rate agreed for that package yet.
-const COMMISSION: Record<string, number> = {
-  "Standard ($79)": 8,
-  "Premium ($149)": 15,
+// Package price used to total up revenue per package tier.
+const PRICE: Record<string, number> = {
+  "Standard ($79)": 79,
+  "Premium ($149)": 149,
+  "Advanced ($299)": 299,
 };
 
 // Older submissions used different labels ("Starter") for the same tier —
@@ -410,34 +410,23 @@ export default function DashboardUI() {
                 const group = subs.filter(s => packageBucket(s.package) === pkg);
                 if (group.length === 0) return null;
                 const connected = group.filter(s => s.domain_connected);
-                const rate = COMMISSION[pkg];
-                const amount = rate !== undefined ? connected.length * rate : null;
+                const amount = connected.length * PRICE[pkg];
                 return (
-                  <div key={pkg} className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-white">{pkg}</p>
-                        <p className="text-xs text-white/40">{group.length} site{group.length !== 1 ? "s" : ""} · {connected.length} domain connected</p>
-                      </div>
-                      <div className="text-right">
-                        {amount !== null ? (
-                          <div className="text-lg font-extrabold text-[#C8F31D]">${amount}</div>
-                        ) : (
-                          <div className="text-xs text-white/30">Not counted</div>
-                        )}
-                      </div>
+                  <div key={pkg} className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{pkg}</p>
+                      <p className="text-xs text-white/40">{group.length} site{group.length !== 1 ? "s" : ""} · {connected.length} domain connected</p>
                     </div>
+                    <div className="text-lg font-extrabold text-[#C8F31D]">${amount}</div>
                   </div>
                 );
               })}
               <div className="rounded-2xl border border-[#C8F31D]/30 bg-[#C8F31D]/10 p-4 flex items-center justify-between">
-                <p className="text-sm font-bold text-white">Total Commission (domain connected)</p>
+                <p className="text-sm font-bold text-white">Total Amount</p>
                 <div className="text-xl font-extrabold text-[#C8F31D]">
                   ${PACKAGES.reduce((sum, pkg) => {
-                    const rate = COMMISSION[pkg];
-                    if (rate === undefined) return sum;
                     const connected = subs.filter(s => packageBucket(s.package) === pkg && s.domain_connected).length;
-                    return sum + connected * rate;
+                    return sum + connected * PRICE[pkg];
                   }, 0)}
                 </div>
               </div>
@@ -464,7 +453,10 @@ export default function DashboardUI() {
                     </tr>
                   </thead>
                   <tbody>
-                    {subs.map(s => (
+                    {(view === "developer"
+                      ? [...subs].sort((a, b) => PACKAGES.indexOf(packageBucket(a.package)) - PACKAGES.indexOf(packageBucket(b.package)))
+                      : subs
+                    ).map(s => (
                       <tr key={s.id} className="cursor-pointer border-b border-white/4 last:border-0 hover:bg-white/3 transition-colors" onClick={() => open(s)}>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2.5">
