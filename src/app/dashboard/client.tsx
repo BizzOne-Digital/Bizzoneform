@@ -72,6 +72,8 @@ const LABEL: Record<Status, string> = {
 
 const TEAM = ["Zubair", "Shumaila", "Preety"];
 
+const PACKAGES = ["Standard ($79)", "Premium ($149)", "Advanced ($299)"];
+
 function fmt(d: string) {
   return new Date(d).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
 }
@@ -108,6 +110,7 @@ export default function DashboardUI() {
   const [eNotes, setENotes]   = useState("");
   const [eMonth, setEMonth]   = useState(currentMonth());
   const [eDomain, setEDomain] = useState(false);
+  const [ePackage, setEPackage] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -135,6 +138,7 @@ export default function DashboardUI() {
     setENotes(s.internal_notes || "");
     setEMonth(subMonth(s));
     setEDomain(!!s.domain_connected);
+    setEPackage(s.package || "");
   };
 
   const save = async (overrides: Partial<{ target_month: string; domain_connected: boolean }> = {}) => {
@@ -142,7 +146,7 @@ export default function DashboardUI() {
     setSaving(true);
     const body = {
       id: selected.id, status: eStatus, assigned_to: eAssign, internal_notes: eNotes,
-      target_month: eMonth, domain_connected: eDomain, ...overrides,
+      target_month: eMonth, domain_connected: eDomain, package: ePackage, ...overrides,
     };
     const res = await fetch("/api/submissions", {
       method: "PATCH",
@@ -156,6 +160,7 @@ export default function DashboardUI() {
       setEStatus(updated.status);
       setEMonth(subMonth(updated));
       setEDomain(!!updated.domain_connected);
+      setEPackage(updated.package || "");
     }
     setSaving(false);
   };
@@ -520,10 +525,21 @@ export default function DashboardUI() {
               {/* Package */}
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/35">Package & Add-Ons</p>
-                <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-1">
-                  <Row label="Package"  value={selected.package} />
-                  <Row label="Add-Ons"  value={selected.addons} />
-                  <Row label="Submitted" value={fmt(selected.created_at)} />
+                <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 space-y-3">
+                  <div>
+                    <p className="mb-1.5 text-xs text-white/40">Package</p>
+                    <select className="w-full rounded-xl border border-white/10 bg-[#05060A] px-4 py-2.5 text-sm text-white outline-none focus:border-[#C8F31D]/50"
+                      value={ePackage} onChange={e => setEPackage(e.target.value)}>
+                      {!PACKAGES.includes(ePackage) && ePackage && (
+                        <option value={ePackage} style={{ background: "#05060A" }}>{ePackage}</option>
+                      )}
+                      {PACKAGES.map(p => <option key={p} value={p} style={{ background: "#05060A" }}>{p}</option>)}
+                    </select>
+                  </div>
+                  <div className="border-t border-white/5 pt-3">
+                    <Row label="Add-Ons"  value={selected.addons} />
+                    <Row label="Submitted" value={fmt(selected.created_at)} />
+                  </div>
                 </div>
               </div>
 

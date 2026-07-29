@@ -116,13 +116,14 @@ export async function PATCH(req: Request) {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { id, status, assigned_to, internal_notes, logo_url, target_month, domain_connected } = await req.json();
+  const { id, status, assigned_to, internal_notes, logo_url, target_month, domain_connected, package: pkg } = await req.json();
   if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
   const update: Record<string, unknown> = { status, assigned_to, internal_notes };
   if (logo_url !== undefined) update.logo_url = logo_url;
   if (target_month !== undefined) update.target_month = target_month;
   if (domain_connected !== undefined) update.domain_connected = domain_connected;
+  if (pkg !== undefined) update.package = pkg;
 
   const col = await getSubmissions();
   const result = await col.findOneAndUpdate(
