@@ -77,6 +77,7 @@ export async function GET(req: Request) {
   const search = searchParams.get("search");
   const month = searchParams.get("month"); // "YYYY-MM"
   const domainConnected = searchParams.get("domain_connected"); // "true" | "false"
+  const assignedTo = searchParams.get("assigned_to");
 
   const col = await getSubmissions();
   await rollOverIncompleteMonths(col);
@@ -85,6 +86,7 @@ export async function GET(req: Request) {
   if (status && status !== "all") query.status = status;
   if (domainConnected === "true") query.domain_connected = true;
   if (domainConnected === "false") query.domain_connected = { $ne: true };
+  if (assignedTo) query.assigned_to = assignedTo;
   if (month) {
     // target_month falls back to the created_at month when not explicitly set
     query.$monthFilter = {

@@ -16,7 +16,7 @@ type Sub = {
   target_month?: string; domain_connected?: boolean;
 };
 
-type ViewMode = "all" | "month" | "domain_month";
+type ViewMode = "all" | "month" | "domain_month" | "developer";
 
 function currentMonth() {
   const d = new Date();
@@ -74,6 +74,23 @@ const TEAM = ["Zubair", "Shumaila", "Preety"];
 
 const PACKAGES = ["Standard ($79)", "Premium ($149)", "Advanced ($299)"];
 
+// Per-site commission paid to the assigned developer once the domain is connected.
+// Advanced isn't counted — no fixed commission rate agreed for that package yet.
+const COMMISSION: Record<string, number> = {
+  "Standard ($79)": 8,
+  "Premium ($149)": 15,
+};
+
+// Older submissions used different labels ("Starter") for the same tier —
+// bucket by keyword/price so commission totals don't miss them.
+function packageBucket(pkg: string): string {
+  const p = (pkg || "").toLowerCase();
+  if (p.includes("advance") || p.includes("$299")) return "Advanced ($299)";
+  if (p.includes("premium") || p.includes("$149")) return "Premium ($149)";
+  if (p.includes("standard") || p.includes("starter") || p.includes("$79")) return "Standard ($79)";
+  return pkg || "Unspecified";
+}
+
 function fmt(d: string) {
   return new Date(d).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
 }
@@ -103,6 +120,7 @@ export default function DashboardUI() {
   const [filter, setFilter]   = useState("all");
   const [view, setView]       = useState<ViewMode>("all");
   const [month, setMonth]     = useState(currentMonth());
+  const [selectedDev, setSelectedDev] = useState<string>(TEAM[0]);
   const [selected, setSelected] = useState<Sub | null>(null);
   const [saving, setSaving]   = useState(false);
   const [eStatus, setEStatus] = useState<Status>("new");
@@ -124,10 +142,11 @@ export default function DashboardUI() {
     if (search) p.set("search", search);
     if (view === "month" || view === "domain_month") p.set("month", month);
     if (view === "domain_month") p.set("domain_connected", "true");
+    if (view === "developer") p.set("assigned_to", selectedDev);
     const res = await fetch(`/api/submissions?${p}`);
     if (res.ok) setSubs(await res.json());
     setLoading(false);
-  }, [filter, search, view, month]);
+  }, [filter, search, view, month, selectedDev]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -341,6 +360,14 @@ export default function DashboardUI() {
               <span className="text-xs text-white/30">{counts[f.k] || 0}</span>
             </button>
           ))}
+
+          <p className="mb-3 mt-4 text-[10px] font-semibold uppercase tracking-widest text-white/30">Team</p>
+          {TEAM.map(t => (
+            <button key={t} onClick={() => { setView("developer"); setSelectedDev(t); }}
+              className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm mb-1 transition-all ${view === "developer" && selectedDev === t ? "bg-white/8 text-white font-semibold" : "text-white/50 hover:text-white hover:bg-white/4"}`}>
+              {t}
+            </button>
+          ))}
         </aside>
 
         {/* Main */}
@@ -374,6 +401,48 @@ export default function DashboardUI() {
               {FILTERS.map(f => <option key={f.k} value={f.k}>{f.l} ({counts[f.k] || 0})</option>)}
             </select>
           </div>
+
+          {/* Developer commission summary */}
+          {view === "developer" && !loading && (
+            <div className="mb-6 space-y-3">
+              <p className="text-sm font-bold text-white">{selectedDev}'s Websites</p>
+              {PACKAGES.map(pkg => {
+                const group = subs.filter(s => packageBucket(s.package) === pkg);
+                if (group.length === 0) return null;
+                const connected = group.filter(s => s.domain_connected);
+                const rate = COMMISSION[pkg];
+                const amount = rate !== undefined ? connected.length * rate : null;
+                return (
+                  <div key={pkg} className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-white">{pkg}</p>
+                        <p className="text-xs text-white/40">{group.length} site{group.length !== 1 ? "s" : ""} · {connected.length} domain connected</p>
+                      </div>
+                      <div className="text-right">
+                        {amount !== null ? (
+                          <div className="text-lg font-extrabold text-[#C8F31D]">${amount}</div>
+                        ) : (
+                          <div className="text-xs text-white/30">Not counted</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="rounded-2xl border border-[#C8F31D]/30 bg-[#C8F31D]/10 p-4 flex items-center justify-between">
+                <p className="text-sm font-bold text-white">Total Commission (domain connected)</p>
+                <div className="text-xl font-extrabold text-[#C8F31D]">
+                  ${PACKAGES.reduce((sum, pkg) => {
+                    const rate = COMMISSION[pkg];
+                    if (rate === undefined) return sum;
+                    const connected = subs.filter(s => packageBucket(s.package) === pkg && s.domain_connected).length;
+                    return sum + connected * rate;
+                  }, 0)}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Table */}
           {loading ? (
