@@ -13,7 +13,7 @@ type Sub = {
   status: Status; assigned_to: string; internal_notes: string;
   services_list: string; pricing_details: string; has_pricing: string;
   contact_page: string; special_offers: string; file_details: string;
-  target_month?: string; domain_connected?: boolean;
+  target_month?: string; domain_connected?: boolean; domain_connected_at?: string;
 };
 
 type ViewMode = "all" | "month" | "domain_month" | "developer";
@@ -72,11 +72,12 @@ const LABEL: Record<Status, string> = {
 
 const TEAM = ["Zubair", "Shumaila", "Preety"];
 
-const PACKAGES = ["Standard ($79)", "Premium ($149)", "Advanced ($299)"];
+const PACKAGES = ["Standard ($79)", "Admin+ ($99)", "Premium ($149)", "Advanced ($299)"];
 
 // Package price used to total up revenue per package tier.
 const PRICE: Record<string, number> = {
   "Standard ($79)": 79,
+  "Admin+ ($99)": 99,
   "Premium ($149)": 149,
   "Advanced ($299)": 299,
 };
@@ -87,6 +88,7 @@ function packageBucket(pkg: string): string {
   const p = (pkg || "").toLowerCase();
   if (p.includes("advance") || p.includes("$299")) return "Advanced ($299)";
   if (p.includes("premium") || p.includes("$149")) return "Premium ($149)";
+  if (p.includes("admin+") || p.includes("$99")) return "Admin+ ($99)";
   if (p.includes("standard") || p.includes("starter") || p.includes("$79")) return "Standard ($79)";
   return pkg || "Unspecified";
 }

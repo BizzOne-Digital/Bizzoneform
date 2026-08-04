@@ -10,26 +10,22 @@ export const runtime = "nodejs";
 // PATCH → update submission (auth required)
 // DELETE → delete submission (auth required) OR logout (if no id)
 
-function currentMonth() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
-
-// Any site whose domain isn't connected yet auto-rolls forward to the current
-// month, so incomplete work never stays stuck on a past month.
-async function rollOverIncompleteMonths(col: Awaited<ReturnType<typeof getSubmissions>>) {
-  const cm = currentMonth();
-
+// "This Month" is keyed off the submission month (target_month), which
+// defaults to created_at's month and only changes if someone manually shifts
+// it — no automatic forward-rolling, so a site only shows up in the month it
+// was actually submitted in unless a team member deliberately moves it.
+async function backfillTargetMonth(col: Awaited<ReturnType<typeof getSubmissions>>) {
   await col.updateMany(
     { $or: [{ target_month: { $exists: false } }, { target_month: "" }] },
     [{ $set: { target_month: { $substrCP: ["$created_at", 0, 7] } } }]
   );
 
-  // Only still-active work (not "done") rolls forward — finished projects keep
-  // whatever month they were delivered in, even if domain was never marked connected.
+  // Sites marked domain_connected before this timestamp field existed have no
+  // connect date on record — default it to created_at so they still show up
+  // under some month in the "Domain Connected" view instead of vanishing.
   await col.updateMany(
-    { domain_connected: { $ne: true }, status: { $ne: "done" }, target_month: { $lt: cm } },
-    { $set: { target_month: cm } }
+    { domain_connected: true, $or: [{ domain_connected_at: { $exists: false } }, { domain_connected_at: null }] },
+    [{ $set: { domain_connected_at: "$created_at" } }]
   );
 }
 
@@ -80,15 +76,22 @@ export async function GET(req: Request) {
   const assignedTo = searchParams.get("assigned_to");
 
   const col = await getSubmissions();
-  await rollOverIncompleteMonths(col);
+  await backfillTargetMonth(col);
 
   const query: Record<string, unknown> = {};
   if (status && status !== "all") query.status = status;
-  if (domainConnected === "true") query.domain_connected = true;
-  if (domainConnected === "false") query.domain_connected = { $ne: true };
   if (assignedTo) query.assigned_to = assignedTo;
-  if (month) {
-    // target_month falls back to the created_at month when not explicitly set
+
+  if (domainConnected === "true") {
+    query.domain_connected = true;
+    // "Domain Connected" view is keyed off the month the domain actually went
+    // live (domain_connected_at), not the delivery/target month — a site
+    // targeted for July whose domain connects in August shows under August.
+    if (month) query.domain_connected_at = { $regex: `^${month}` };
+  } else if (domainConnected === "false") {
+    query.domain_connected = { $ne: true };
+  } else if (month) {
+    // "This Month" view falls back to the created_at month when target_month isn't set
     query.$monthFilter = {
       $or: [
         { target_month: month },
@@ -124,10 +127,21 @@ export async function PATCH(req: Request) {
   const update: Record<string, unknown> = { status, assigned_to, internal_notes };
   if (logo_url !== undefined) update.logo_url = logo_url;
   if (target_month !== undefined) update.target_month = target_month;
-  if (domain_connected !== undefined) update.domain_connected = domain_connected;
   if (pkg !== undefined) update.package = pkg;
 
   const col = await getSubmissions();
+
+  if (domain_connected !== undefined) {
+    update.domain_connected = domain_connected;
+    if (domain_connected) {
+      const existing = await col.findOne({ _id: new ObjectId(id) });
+      // Keep the original connect date if it was already connected; only stamp on the flip to true.
+      if (!existing?.domain_connected) update.domain_connected_at = new Date().toISOString();
+    } else {
+      update.domain_connected_at = null;
+    }
+  }
+
   const result = await col.findOneAndUpdate(
     { _id: new ObjectId(id) },
     { $set: update },
