@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { MessageCircle, X, RotateCcw, ChevronRight } from "lucide-react";
 
 interface Msg { from: "bot" | "user"; text: string }
@@ -110,6 +111,7 @@ const FLOW: Record<string, Node> = {
 };
 
 export default function ChatBot() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([{ from: "bot", text: FLOW.start.text }]);
   const [node, setNode] = useState("start");
@@ -133,6 +135,7 @@ export default function ChatBot() {
 
   const current = FLOW[node];
 
+  if (pathname?.startsWith("/credentials")) return null;
   return (
     <>
       {/* Chat panel */}

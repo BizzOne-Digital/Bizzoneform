@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Search, LogOut, RefreshCw, X, Trash2, Upload, ChevronLeft, ChevronRight, Download, Globe } from "lucide-react";
+import { DashboardCredentialsSection, CredentialsViewer } from "@/components/DashboardCredentials";
 
 type Status = "new" | "in_progress" | "done" | "on_hold";
 type Sub = {
@@ -133,6 +134,7 @@ export default function DashboardUI() {
   const [ePackage, setEPackage] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [credentialsViewId, setCredentialsViewId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -407,7 +409,7 @@ export default function DashboardUI() {
           {/* Developer commission summary */}
           {view === "developer" && !loading && (
             <div className="mb-6 space-y-3">
-              <p className="text-sm font-bold text-white">{selectedDev}'s Websites</p>
+              <p className="text-sm font-bold text-white">{selectedDev}&apos;s Websites</p>
               {PACKAGES.map(pkg => {
                 const group = subs.filter(s => packageBucket(s.package) === pkg);
                 if (group.length === 0) return null;
@@ -665,8 +667,23 @@ export default function DashboardUI() {
                   <Row label="Inspiration" value={selected.inspo} />
                 </div>
               </div>
+
+              {/* Client Credentials */}
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/35">Client Credentials</p>
+                <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+                  <DashboardCredentialsSection
+                    submissionId={selected.id}
+                    onViewCredentials={setCredentialsViewId}
+                  />
+                </div>
+              </div>
             </div>
           </aside>
+        )}
+
+        {credentialsViewId && (
+          <CredentialsViewer credentialsId={credentialsViewId} onClose={() => setCredentialsViewId(null)} />
         )}
       </div>
     </div>

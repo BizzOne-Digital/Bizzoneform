@@ -26,3 +26,12 @@ export async function getSubmissions() {
   const db = await getDb();
   return db.collection("submissions");
 }
+
+export async function getCredentials() {
+  const db = await getDb();
+  const col = db.collection("credentials");
+  await col.createIndex({ submission_id: 1 });
+  await col.createIndex({ "request.token_hash": 1 }, { sparse: true });
+  await col.createIndex({ submitted_at: -1 });
+  return col;
+}

@@ -1,0 +1,16 @@
+export const FIELD_LABELS: Record<string, string> = {
+  stripe_publishable_key: "Stripe Publishable Key",
+  stripe_secret_key: "Stripe Secret Key",
+  paypal_client_id: "PayPal Client ID",
+  paypal_client_secret: "PayPal Client Secret",
+  square_application_id: "Square Application ID",
+  square_access_token: "Square Access Token",
+  square_location_id: "Square Location ID",
+  clover_merchant_id: "Clover Merchant ID",
+  clover_app_id: "Clover App ID",
+  clover_app_secret: "Clover App Secret / API Token",
+  other_credentials: "Other API Keys / Credentials",
+  google_app_password: "Google App Password",
+  domain_login: "Domain Login (Email / Username / Client ID)",
+  domain_password: "Domain Account Password",
+};
