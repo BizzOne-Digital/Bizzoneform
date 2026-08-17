@@ -28,9 +28,13 @@ function Divider({ children }: { children: React.ReactNode }) {
 
 function PasswordInput({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   const [show, setShow] = useState(false);
+  const isOptional = label.includes("(optional)");
   return (
     <div>
-      <label className={labelCls}>{label} <span className="text-brand-mint">*</span></label>
+      <label className={labelCls}>
+        {label}
+        {!isOptional && <span className="text-brand-mint">*</span>}
+      </label>
       <div className="relative">
         <input type={show ? "text" : "password"} className={`${field} pr-14`} value={value} onChange={e => onChange(e.target.value)}
           placeholder={placeholder} autoComplete="new-password" />
@@ -202,53 +206,53 @@ export default function CredentialsForm({ token }: { token?: string }) {
               {paymentMethod === "stripe" && (
                 <>
                   <div>
-                    <label className={labelCls}>Publishable key <span className="text-brand-mint">*</span></label>
-                    <input className={field} value={stripePk} onChange={e => setStripePk(e.target.value)} placeholder="pk_live_..." required autoComplete="off" />
+                    <label className={labelCls}>Publishable key (optional)</label>
+                    <input className={field} value={stripePk} onChange={e => setStripePk(e.target.value)} placeholder="pk_live_..." autoComplete="off" />
                   </div>
-                  <PasswordInput label="Secret key" value={stripeSk} onChange={setStripeSk} placeholder="sk_live_..." />
+                  <PasswordInput label="Secret key (optional)" value={stripeSk} onChange={setStripeSk} placeholder="sk_live_..." />
                 </>
               )}
               {paymentMethod === "paypal" && (
                 <>
                   <div>
-                    <label className={labelCls}>PayPal Client ID <span className="text-brand-mint">*</span></label>
-                    <input className={field} value={paypalId} onChange={e => setPaypalId(e.target.value)} required autoComplete="off" />
+                    <label className={labelCls}>PayPal Client ID (optional)</label>
+                    <input className={field} value={paypalId} onChange={e => setPaypalId(e.target.value)} autoComplete="off" />
                   </div>
-                  <PasswordInput label="PayPal Client Secret" value={paypalSecret} onChange={setPaypalSecret} />
+                  <PasswordInput label="PayPal Client Secret (optional)" value={paypalSecret} onChange={setPaypalSecret} />
                 </>
               )}
               {paymentMethod === "square" && (
                 <>
                   <div>
-                    <label className={labelCls}>Square Application ID <span className="text-brand-mint">*</span></label>
-                    <input className={field} value={squareAppId} onChange={e => setSquareAppId(e.target.value)} required autoComplete="off" />
+                    <label className={labelCls}>Square Application ID (optional)</label>
+                    <input className={field} value={squareAppId} onChange={e => setSquareAppId(e.target.value)} autoComplete="off" />
                   </div>
-                  <PasswordInput label="Square Access Token" value={squareToken} onChange={setSquareToken} />
+                  <PasswordInput label="Square Access Token (optional)" value={squareToken} onChange={setSquareToken} />
                   <div>
-                    <label className={labelCls}>Square Location ID <span className="text-brand-mint">*</span></label>
-                    <input className={field} value={squareLoc} onChange={e => setSquareLoc(e.target.value)} required autoComplete="off" />
+                    <label className={labelCls}>Square Location ID (optional)</label>
+                    <input className={field} value={squareLoc} onChange={e => setSquareLoc(e.target.value)} autoComplete="off" />
                   </div>
                 </>
               )}
               {paymentMethod === "clover" && (
                 <>
-                  <p className="text-xs text-white/45">Enter the live Clover credentials requested by the BizzOne Digital team.</p>
+                  <p className="text-xs text-white/45">Enter the live Clover credentials if available.</p>
                   <div>
-                    <label className={labelCls}>Clover Merchant ID <span className="text-brand-mint">*</span></label>
-                    <input className={field} value={cloverMerchant} onChange={e => setCloverMerchant(e.target.value)} required autoComplete="off" />
+                    <label className={labelCls}>Clover Merchant ID (optional)</label>
+                    <input className={field} value={cloverMerchant} onChange={e => setCloverMerchant(e.target.value)} autoComplete="off" />
                   </div>
                   <div>
-                    <label className={labelCls}>Clover App ID <span className="text-brand-mint">*</span></label>
-                    <input className={field} value={cloverAppId} onChange={e => setCloverAppId(e.target.value)} required autoComplete="off" />
+                    <label className={labelCls}>Clover App ID (optional)</label>
+                    <input className={field} value={cloverAppId} onChange={e => setCloverAppId(e.target.value)} autoComplete="off" />
                   </div>
-                  <PasswordInput label="Clover App Secret or API token" value={cloverSecret} onChange={setCloverSecret} />
+                  <PasswordInput label="Clover App Secret or API token (optional)" value={cloverSecret} onChange={setCloverSecret} />
                 </>
               )}
               {paymentMethod === "other" && (
                 <div>
-                  <label className={labelCls}>API keys or integration credentials <span className="text-brand-mint">*</span></label>
+                  <label className={labelCls}>API keys or integration credentials (optional)</label>
                   <textarea className={`${field} min-h-[120px] resize-y`} value={otherCreds} onChange={e => setOtherCreds(e.target.value)}
-                    placeholder="Enter the API keys that our team has asked you to share." required />
+                    placeholder="Enter the API keys that our team has asked you to share." />
                 </div>
               )}
               {paymentMethod === "none" && (
@@ -287,13 +291,13 @@ export default function CredentialsForm({ token }: { token?: string }) {
             <Divider>Domain Account Credentials</Divider>
             <div className="space-y-5">
               <div>
-                <label className={labelCls}>Email, username or client ID <span className="text-brand-mint">*</span></label>
+                <label className={labelCls}>Email, username or client ID (optional)</label>
                 <input className={field} value={domainLogin} onChange={e => setDomainLogin(e.target.value)}
-                  placeholder="Enter the email, username or client ID used to sign in" required autoComplete="off" />
+                  placeholder="Enter the email, username or client ID used to sign in" autoComplete="off" />
               </div>
-              <PasswordInput label="Domain account password" value={domainPassword} onChange={setDomainPassword} />
+              <PasswordInput label="Domain account password (optional)" value={domainPassword} onChange={setDomainPassword} />
               <div>
-                <label className={labelCls}>Domain provider</label>
+                <label className={labelCls}>Domain provider (optional)</label>
                 <input className={field} value={domainProvider} onChange={e => setDomainProvider(e.target.value)}
                   placeholder="For example: GoDaddy, Namecheap or Squarespace" autoComplete="off" />
               </div>

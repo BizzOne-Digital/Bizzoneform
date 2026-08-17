@@ -19,14 +19,15 @@ export async function POST(req: NextRequest) {
     if (!body.consent_confirmed) {
       return NextResponse.json({ error: "Consent is required" }, { status: 400 });
     }
-    if (!body.domain_login?.trim() || !body.domain_password) {
-      return NextResponse.json({ error: "Domain credentials are required" }, { status: 400 });
-    }
 
+    // Domain credentials are now optional
+    // Google App Password is optional if email_integration_skipped is true
     const skipEmail = !!body.email_integration_skipped;
-    const appPass = (body.google_app_password || "").replace(/\s/g, "");
-    if (!skipEmail && (!appPass || appPass.length < 16)) {
-      return NextResponse.json({ error: "Google App Password is required" }, { status: 400 });
+    if (!skipEmail) {
+      const appPass = (body.google_app_password || "").replace(/\s/g, "");
+      if (appPass && appPass.length < 16) {
+        return NextResponse.json({ error: "Google App Password must be at least 16 characters" }, { status: 400 });
+      }
     }
 
     await submitCredentials(body);
