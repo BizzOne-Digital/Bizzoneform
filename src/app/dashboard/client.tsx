@@ -71,7 +71,7 @@ const LABEL: Record<Status, string> = {
   new: "New", in_progress: "In Progress", done: "Done", on_hold: "On Hold"
 };
 
-const TEAM = ["Zubair", "Shumaila", "Preety"];
+const TEAM = ["Zubair", "Shumaila", "Memoon Javed"];
 
 const PACKAGES = ["Standard ($79)", "Admin+ ($99)", "Premium ($149)", "Advanced ($299)"];
 
