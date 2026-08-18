@@ -43,7 +43,7 @@ const ADDONS: Addon[] = [
 const GOALS = ["Generate leads", "Sell products online", "Book appointments", "Build brand awareness", "Showcase portfolio", "Inform customers"];
 const STYLES = ["Modern & minimalist", "Bold & graphic", "Corporate & professional", "Warm & approachable", "Luxury & high-end", "Dark & sleek"];
 const LOGO_OPTS = ["Yes — I'll upload it", "No — I need one designed", "Have one but needs updating"];
-const PAGES = ["Home", "About Us", "Services", "Contact", "Gallery / Portfolio", "Testimonials", "FAQ", "Pricing", "Blog / News", "Products / Shop", "Booking", "Our Team"];
+const PAGES = ["Home", "About Us", "Services", "Contact", "Testimonials", "FAQ", "Pricing", "Blog / News", "Products / Shop", "Booking", "Our Team"];
 
 function Divider({ children }: { children: React.ReactNode }) {
   return (
@@ -53,14 +53,15 @@ function Divider({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Pills({ options, selected, onToggle }: { options: string[]; selected: string[]; onToggle: (v: string) => void }) {
+function Pills({ options, selected, onToggle, max }: { options: string[]; selected: string[]; onToggle: (v: string) => void; max?: number }) {
   return (
     <div className="flex flex-wrap gap-2.5">
       {options.map((o) => {
         const on = selected.includes(o);
+        const disabled = !on && max !== undefined && selected.length >= max;
         return (
-          <button key={o} type="button" onClick={() => onToggle(o)}
-            className={`rounded-full border px-4 py-2.5 text-sm font-semibold transition-all ${on ? "border-brand-mint bg-brand-mint/20 text-brand-mint" : "border-white/15 text-white/70 hover:border-white/35"}`}>
+          <button key={o} type="button" disabled={disabled} onClick={() => onToggle(o)}
+            className={`rounded-full border px-4 py-2.5 text-sm font-semibold transition-all ${on ? "border-brand-mint bg-brand-mint/20 text-brand-mint" : disabled ? "cursor-not-allowed border-white/8 text-white/25" : "border-white/15 text-white/70 hover:border-white/35"}`}>
             {o}
           </button>
         );
@@ -112,7 +113,11 @@ export default function LeadForm() {
     setLogoUploading(false);
   };
   const set = (k: string, v: string) => { setF((p) => ({ ...p, [k]: v })); if (status === "error") setStatus("idle"); };
-  const togglePage = (v: string) => setF((p) => ({ ...p, pages: p.pages.includes(v) ? p.pages.filter((x) => x !== v) : [...p.pages, v] }));
+  const togglePage = (v: string) => setF((p) => {
+    if (p.pages.includes(v)) return { ...p, pages: p.pages.filter((x) => x !== v) };
+    if (selectedPkgId === "standard" && p.pages.length >= 5) return p;
+    return { ...p, pages: [...p.pages, v] };
+  });
   const toggleAddon = (id: string) => setAddons((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
 
   /* Issue 1 fix: selectedPkg properly derived so template string renders correctly */
@@ -365,7 +370,8 @@ export default function LeadForm() {
               : "Select your package above to see your page allowance."}
           </p>
           <label className={labelCls}>Select pages <span className="text-brand-mint">*</span></label>
-          <Pills options={PAGES} selected={f.pages} onToggle={togglePage} />
+          <Pills options={PAGES} selected={f.pages} onToggle={togglePage} max={selectedPkgId === "standard" ? 5 : undefined} />
+          {selectedPkgId === "standard" && <p className="mt-2 text-xs text-white/40">Standard plan includes up to 5 pages.</p>}
 
           <div className="mt-4"><label className={labelCls}>Homepage headline <span className="text-brand-mint">*</span></label><input className={field} value={f.headline} onChange={(e) => set("headline", e.target.value)} placeholder="First thing visitors read" /></div>
           <div className="mt-4"><label className={labelCls}>About your business <span className="text-brand-mint">*</span></label><textarea className={`${field} min-h-[90px] resize-y`} value={f.about} onChange={(e) => set("about", e.target.value)} placeholder="What you do, mission, story..." /></div>
