@@ -113,7 +113,9 @@ export async function GET(req: Request) {
   if (query.$monthFilter) { andClauses.push(query.$monthFilter); delete query.$monthFilter; }
   if (query.$searchFilter) { andClauses.push(query.$searchFilter); delete query.$searchFilter; }
   if (andClauses.length) query.$and = andClauses;
-  const docs = await col.find(query).sort({ created_at: -1 }).toArray();
+  // Group by target_month first so the list never jumps back and forth
+  // between months — within a month, newest submission first.
+  const docs = await col.find(query).sort({ target_month: -1, created_at: -1 }).toArray();
   return NextResponse.json(docs.map(d => ({ ...d, id: d._id.toString(), _id: undefined })));
 }
 

@@ -144,7 +144,7 @@ export default function DashboardUI() {
     const p = new URLSearchParams();
     if (filter !== "all") p.set("status", filter);
     if (search) p.set("search", search);
-    if (view === "month" || view === "domain_month") p.set("month", month);
+    if (view === "month" || view === "domain_month" || view === "developer") p.set("month", month);
     if (view === "domain_month") p.set("domain_connected", "true");
     if (view === "developer") p.set("assigned_to", selectedDev);
     const res = await fetch(`/api/submissions?${p}`);
@@ -344,18 +344,6 @@ export default function DashboardUI() {
             </button>
           ))}
 
-          {(view === "month" || view === "domain_month") && (
-            <div className="mt-2 mb-4 flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-2 py-2">
-              <button onClick={() => setMonth(m => shiftMonth(m, -1))} className="grid h-6 w-6 place-items-center rounded-lg text-white/40 hover:text-white">
-                <ChevronLeft size={14} />
-              </button>
-              <span className="text-[11px] font-semibold text-white/70">{monthLabel(month)}</span>
-              <button onClick={() => setMonth(m => shiftMonth(m, 1))} className="grid h-6 w-6 place-items-center rounded-lg text-white/40 hover:text-white">
-                <ChevronRight size={14} />
-              </button>
-            </div>
-          )}
-
           <p className="mb-3 mt-4 text-[10px] font-semibold uppercase tracking-widest text-white/30">Status</p>
           {FILTERS.map(f => (
             <button key={f.k} onClick={() => setFilter(f.k)}
@@ -372,6 +360,18 @@ export default function DashboardUI() {
               {t}
             </button>
           ))}
+
+          {(view === "month" || view === "domain_month" || view === "developer") && (
+            <div className="mt-3 flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-2 py-2">
+              <button onClick={() => setMonth(m => shiftMonth(m, -1))} className="grid h-6 w-6 place-items-center rounded-lg text-white/40 hover:text-white">
+                <ChevronLeft size={14} />
+              </button>
+              <span className="text-[11px] font-semibold text-white/70">{monthLabel(month)}</span>
+              <button onClick={() => setMonth(m => shiftMonth(m, 1))} className="grid h-6 w-6 place-items-center rounded-lg text-white/40 hover:text-white">
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          )}
         </aside>
 
         {/* Main */}
