@@ -144,9 +144,9 @@ export default function Home() {
                   <button onClick={() => go(1)} className="grid h-8 w-8 place-items-center rounded-full glass text-white/60 hover:text-brand-mint"><ChevronRight size={14} /></button>
                 </div>
               </div>
-              <div className="mt-2 flex gap-1.5">
+              <div className="mt-2 flex flex-wrap gap-1.5">
                 {PROJECTS.map((_, i) => (
-                  <button key={i} onClick={() => setActive(i)} className={`h-1.5 rounded-full transition-all ${i === active ? "w-5 bg-brand-mint" : "w-1.5 bg-white/20"}`} />
+                  <button key={i} onClick={() => setActive(i)} className={`h-1.5 shrink-0 rounded-full transition-all ${i === active ? "w-5 bg-brand-mint" : "w-1.5 bg-white/20"}`} />
                 ))}
               </div>
             </div>
