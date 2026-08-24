@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, ExternalLink, MapPin } from "lucide-react";
-import Reviews from "@/components/Reviews";
 import LeadForm from "@/components/LeadForm";
 
 /* ── Issue 5 fix: removed "Certification" label from AEM Quality ISO ── */
@@ -153,7 +152,6 @@ export default function Home() {
           </div>
         </section>
 
-        <Reviews />
         <LeadForm />
       </main>
 

@@ -34,10 +34,7 @@ const ADDONS: Addon[] = [
   { id: "payment", label: "Payment Integration", desc: "Accept payments on your site", premium: true },
   { id: "ecommerce", label: "eCommerce / Online Store", desc: "Sell products with cart & checkout", premium: true },
   { id: "booking", label: "Online Booking System", desc: "Let clients book appointments", premium: true },
-  { id: "newsletter", label: "Email Newsletter", desc: "Capture leads with email signup", premium: true },
-  { id: "crm", label: "CRM Integration", desc: "Connect to your CRM (GoHighLevel, etc.)", premium: true },
   { id: "multilang", label: "Multi-Language", desc: "Website in multiple languages", premium: true },
-  { id: "custom-design", label: "Fully Custom Design", desc: "Bespoke design, no templates", premium: true },
 ];
 
 const GOALS = ["Generate leads", "Sell products online", "Book appointments", "Build brand awareness", "Showcase portfolio", "Inform customers"];
@@ -131,9 +128,6 @@ export default function LeadForm() {
     if (!f.business || !f.name || !f.email || !f.phone) {
       setStatus("error"); setErr("Please fill in all your business details (Business name, Contact person, Email, Phone)."); return;
     }
-    if (!f.site) { setStatus("error"); setErr("Please enter your current website."); return; }
-    if (!f.social) { setStatus("error"); setErr("Please enter your social media handles."); return; }
-    
     // Project details validation
     if (!f.goal) { setStatus("error"); setErr("Please select your main business goal."); return; }
     if (!f.audience) { setStatus("error"); setErr("Please describe your target audience."); return; }
@@ -143,8 +137,6 @@ export default function LeadForm() {
     if (f.logo === "Yes — I'll upload it" && !logoUrl) { setStatus("error"); setErr("Please upload your logo file."); return; }
     if (!f.style) { setStatus("error"); setErr("Please select a design style."); return; }
     if (!f.colors) { setStatus("error"); setErr("Please enter your brand colours."); return; }
-    if (!f.inspo) { setStatus("error"); setErr("Please provide inspiration websites (2-3 links)."); return; }
-    
     // Pages validation
     if (f.pages.length === 0) { setStatus("error"); setErr("Please select at least one page for your website."); return; }
     if (!f.headline) { setStatus("error"); setErr("Please enter your homepage headline."); return; }
@@ -315,8 +307,8 @@ export default function LeadForm() {
             <div><label className={labelCls}>Contact person <span className="text-brand-mint">*</span></label><input className={field} value={f.name} onChange={(e) => set("name", e.target.value)} placeholder="First and last name" /></div>
             <div><label className={labelCls}>Email <span className="text-brand-mint">*</span></label><input type="email" className={field} value={f.email} onChange={(e) => set("email", e.target.value)} placeholder="you@business.com" /></div>
             <div><label className={labelCls}>Phone <span className="text-brand-mint">*</span></label><input type="tel" className={field} value={f.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+1 (___) ___-____" /></div>
-            <div><label className={labelCls}>Current website <span className="text-brand-mint">*</span></label><input type="url" className={field} value={f.site} onChange={(e) => set("site", e.target.value)} placeholder="https://..." /></div>
-            <div><label className={labelCls}>Social media <span className="text-brand-mint">*</span></label><input className={field} value={f.social} onChange={(e) => set("social", e.target.value)} placeholder="Instagram, Facebook..." /></div>
+            <div><label className={labelCls}>Current website</label><input type="url" className={field} value={f.site} onChange={(e) => set("site", e.target.value)} placeholder="https://..." /></div>
+            <div><label className={labelCls}>Social media</label><input className={field} value={f.social} onChange={(e) => set("social", e.target.value)} placeholder="Instagram, Facebook..." /></div>
           </div>
 
           {/* ── Project ── */}
@@ -359,7 +351,7 @@ export default function LeadForm() {
           )}
 
           <div className="mt-4"><label className={labelCls}>Brand colours <span className="text-brand-mint">*</span></label><input className={field} value={f.colors} onChange={(e) => set("colors", e.target.value)} placeholder="e.g. Purple #8C00FF — or 'help me choose'" /></div>
-          <div className="mt-4"><label className={labelCls}>Inspiration websites <span className="text-brand-mint">*</span></label><textarea className={`${field} min-h-[80px] resize-y`} value={f.inspo} onChange={(e) => set("inspo", e.target.value)} placeholder="2–3 links and what you like" /></div>
+          <div className="mt-4"><label className={labelCls}>Inspiration websites</label><textarea className={`${field} min-h-[80px] resize-y`} value={f.inspo} onChange={(e) => set("inspo", e.target.value)} placeholder="2–3 links and what you like" /></div>
 
           {/* ── Pages ── */}
           <Divider>Pages You Need</Divider>
