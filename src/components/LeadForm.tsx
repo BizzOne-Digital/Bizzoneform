@@ -199,17 +199,6 @@ export default function LeadForm() {
     <section className="relative py-12 sm:py-16">
       <div className="section">
 
-        {/* ── Issue 2 fix: 5-step process ── */}
-        <div className="mx-auto mb-12 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-5">
-          {STEPS.map((s) => (
-            <div key={s.title} className="rounded-2xl glass p-5 text-center">
-              <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-xl bg-brand-mint/15 text-brand-mint"><s.icon size={24} /></span>
-              <div className="text-base font-bold text-white">{s.title}</div>
-              <p className="mt-1.5 text-sm leading-snug text-white/80">{s.desc}</p>
-            </div>
-          ))}
-        </div>
-
         <div className="mx-auto mb-8 max-w-5xl rounded-3xl glass-strong p-5 sm:p-8">
 
           {/* ── Issue 3 fix: YOUR SELECTED PACKAGE — display only ── */}
