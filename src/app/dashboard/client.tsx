@@ -71,7 +71,7 @@ const LABEL: Record<Status, string> = {
   new: "New", in_progress: "In Progress", done: "Done", on_hold: "On Hold"
 };
 
-const TEAM = ["Zubair", "Shumaila", "Memoon Javed"];
+const TEAM = ["Zubair", "Shumaila", "Memoon Javed", "Atif"];
 
 const PACKAGES = ["Standard ($79)", "Admin+ ($99)", "Premium ($149)", "Advanced ($299)"];
 
@@ -414,26 +414,13 @@ export default function DashboardUI() {
                 const group = subs.filter(s => packageBucket(s.package) === pkg);
                 if (group.length === 0) return null;
                 const connected = group.filter(s => s.domain_connected);
-                const amount = connected.length * PRICE[pkg];
                 return (
-                  <div key={pkg} className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-white">{pkg}</p>
-                      <p className="text-xs text-white/40">{group.length} site{group.length !== 1 ? "s" : ""} · {connected.length} domain connected</p>
-                    </div>
-                    <div className="text-lg font-extrabold text-[#C8F31D]">${amount}</div>
+                  <div key={pkg} className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+                    <p className="text-sm font-semibold text-white">{pkg}</p>
+                    <p className="text-xs text-white/40">{group.length} site{group.length !== 1 ? "s" : ""} · {connected.length} domain connected</p>
                   </div>
                 );
               })}
-              <div className="rounded-2xl border border-[#C8F31D]/30 bg-[#C8F31D]/10 p-4 flex items-center justify-between">
-                <p className="text-sm font-bold text-white">Total Amount</p>
-                <div className="text-xl font-extrabold text-[#C8F31D]">
-                  ${PACKAGES.reduce((sum, pkg) => {
-                    const connected = subs.filter(s => packageBucket(s.package) === pkg && s.domain_connected).length;
-                    return sum + connected * PRICE[pkg];
-                  }, 0)}
-                </div>
-              </div>
             </div>
           )}
 
