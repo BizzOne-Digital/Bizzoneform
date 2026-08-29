@@ -8,7 +8,7 @@ type Status = "new" | "in_progress" | "done" | "on_hold";
 type Sub = {
   id: string; created_at: string; business: string; name: string;
   email: string; phone: string; package: string; addons: string;
-  site: string; social: string; goal: string; audience: string;
+  site: string; social: string; industry?: string; goal: string; audience: string;
   logo: string; logo_url?: string; colors: string; style: string; inspo: string;
   pages: string; headline: string; about: string; notes: string;
   status: Status; assigned_to: string; internal_notes: string;
@@ -438,7 +438,7 @@ export default function DashboardUI() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/6">
-                      {["Business", "Contact", "Package", "Date", "Month", "Domain", "Assigned", "Status", ""].map(h => (
+                      {["Business", "Contact", "Industry", "Package", "Date", "Month", "Domain", "Assigned", "Status", ""].map(h => (
                         <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-white/35">{h}</th>
                       ))}
                     </tr>
@@ -459,6 +459,7 @@ export default function DashboardUI() {
                           <div className="text-white/80">{s.name}</div>
                           <div className="text-xs text-white/40">{s.email}</div>
                         </td>
+                        <td className="px-4 py-3 text-white/60">{s.industry || "—"}</td>
                         <td className="px-4 py-3 text-white/60">{s.package || "—"}</td>
                         <td className="px-4 py-3 text-xs text-white/45">{fmt(s.created_at)}</td>
                         <td className="px-4 py-3 text-xs text-white/45">{monthLabel(subMonth(s))}</td>
@@ -571,6 +572,7 @@ export default function DashboardUI() {
                   <Row label="Phone"  value={selected.phone} />
                   <Row label="Website" value={selected.site} />
                   <Row label="Social" value={selected.social} />
+                  <Row label="Industry" value={selected.industry || ""} />
                 </div>
               </div>
 

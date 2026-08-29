@@ -41,6 +41,18 @@ const GOALS = ["Generate leads", "Sell products online", "Book appointments", "B
 const STYLES = ["Modern & minimalist", "Bold & graphic", "Corporate & professional", "Warm & approachable", "Luxury & high-end", "Dark & sleek"];
 const LOGO_OPTS = ["Yes — I'll upload it", "No — I need one designed", "Have one but needs updating"];
 const PAGES = ["Home", "About Us", "Services", "Contact", "Testimonials", "FAQ", "Pricing", "Blog / News", "Products / Shop", "Booking", "Our Team"];
+const INDUSTRIES = [
+  "Healthcare & Medical", "Legal", "Real Estate", "Construction", "Home Services", "Automotive",
+  "Finance & Insurance", "Technology & IT", "Marketing & Advertising", "Retail & E-commerce",
+  "Food & Restaurants", "Hospitality & Tourism", "Beauty & Personal Care", "Fitness & Wellness",
+  "Education", "Professional Services", "Manufacturing", "Transportation & Logistics",
+  "Entertainment & Media", "Travel", "Agriculture", "Energy & Utilities", "Telecommunications",
+  "Industrial Services", "Wholesale & Distribution", "Pet Services", "Events & Weddings",
+  "Nonprofit & Community", "Government & Public Services", "Security & Protection",
+  "Cleaning & Maintenance", "Fashion & Apparel", "Beauty & Cosmetics", "Sports & Recreation",
+  "Consumer Services", "B2B Services", "Hospitality & Leisure", "Pharmaceuticals & Biotechnology",
+  "Architecture & Engineering", "Environmental Services", "Other",
+];
 
 function Divider({ children }: { children: React.ReactNode }) {
   return (
@@ -82,7 +94,7 @@ export default function LeadForm() {
   const [addons, setAddons] = useState<string[]>([]);
   const [f, setF] = useState({
     business: "", name: "", email: "", phone: "", site: "", social: "",
-    goal: "", audience: "",
+    industry: "", goal: "", audience: "",
     logo: "", colors: "", style: "", inspo: "",
     pages: [] as string[], headline: "", about: "",
     servicesList: "", pricingDetails: "", hasPricing: "", contactPageInfo: "",
@@ -128,6 +140,7 @@ export default function LeadForm() {
     if (!f.business || !f.name || !f.email || !f.phone) {
       setStatus("error"); setErr("Please fill in all your business details (Business name, Contact person, Email, Phone)."); return;
     }
+    if (!f.industry) { setStatus("error"); setErr("Please select your industry."); return; }
     // Project details validation
     if (!f.goal) { setStatus("error"); setErr("Please select your main business goal."); return; }
     if (!f.audience) { setStatus("error"); setErr("Please describe your target audience."); return; }
@@ -298,6 +311,7 @@ export default function LeadForm() {
             <div><label className={labelCls}>Phone <span className="text-brand-mint">*</span></label><input type="tel" className={field} value={f.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+1 (___) ___-____" /></div>
             <div><label className={labelCls}>Current website</label><input type="url" className={field} value={f.site} onChange={(e) => set("site", e.target.value)} placeholder="https://..." /></div>
             <div><label className={labelCls}>Social media</label><input className={field} value={f.social} onChange={(e) => set("social", e.target.value)} placeholder="Instagram, Facebook..." /></div>
+            <div><label className={labelCls}>Industry <span className="text-brand-mint">*</span></label><Select value={f.industry} onChange={(v) => set("industry", v)} placeholder="Select your industry" options={INDUSTRIES} /></div>
           </div>
 
           {/* ── Project ── */}
