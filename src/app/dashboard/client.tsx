@@ -119,11 +119,13 @@ function Row({ label, value }: { label: string; value: string }) {
 export default function DashboardUI() {
   const [subs, setSubs]       = useState<Sub[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch]   = useState("");
   const [filter, setFilter]   = useState("all");
   const [view, setView]       = useState<ViewMode>("all");
   const [month, setMonth]     = useState(currentMonth());
   const [selectedDev, setSelectedDev] = useState<string>(TEAM[0]);
+  const [devDomainOnly, setDevDomainOnly] = useState(false);
   const [selected, setSelected] = useState<Sub | null>(null);
   const [saving, setSaving]   = useState(false);
   const [eStatus, setEStatus] = useState<Status>("new");
@@ -139,18 +141,27 @@ export default function DashboardUI() {
   const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    const id = setTimeout(() => setSearch(searchInput), 350);
+    return () => clearTimeout(id);
+  }, [searchInput]);
+
   const load = useCallback(async () => {
     setLoading(true);
     const p = new URLSearchParams();
     if (filter !== "all") p.set("status", filter);
     if (search) p.set("search", search);
-    if (view === "month" || view === "domain_month" || view === "developer") p.set("month", month);
+    if (view === "month" || view === "domain_month") p.set("month", month);
     if (view === "domain_month") p.set("domain_connected", "true");
-    if (view === "developer") p.set("assigned_to", selectedDev);
+    if (view === "developer") {
+      p.set("assigned_to", selectedDev);
+      p.set("month", month);
+      if (devDomainOnly) p.set("domain_connected", "true");
+    }
     const res = await fetch(`/api/submissions?${p}`);
     if (res.ok) setSubs(await res.json());
     setLoading(false);
-  }, [filter, search, view, month, selectedDev]);
+  }, [filter, search, view, month, selectedDev, devDomainOnly]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -398,7 +409,7 @@ export default function DashboardUI() {
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35" />
               <input className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-2.5 pl-9 pr-4 text-sm text-white placeholder-white/30 outline-none focus:border-[#C8F31D]/50"
                 placeholder="Search business, name, email..."
-                value={search} onChange={e => setSearch(e.target.value)} />
+                value={searchInput} onChange={e => setSearchInput(e.target.value)} />
             </div>
             <select className="rounded-xl border border-white/10 bg-[#05060A] px-3 py-2.5 text-sm text-white/70 lg:hidden"
               value={filter} onChange={e => setFilter(e.target.value)}>
@@ -406,18 +417,37 @@ export default function DashboardUI() {
             </select>
           </div>
 
-          {/* Developer commission summary */}
+          {/* Developer view: All / Domain Connected tabs */}
+          {view === "developer" && (
+            <div className="mb-5 flex gap-2">
+              <button onClick={() => setDevDomainOnly(false)}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${!devDomainOnly ? "bg-white/10 text-white" : "text-white/45 hover:text-white"}`}>
+                All Websites
+              </button>
+              <button onClick={() => setDevDomainOnly(true)}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${devDomainOnly ? "bg-green-500/15 text-green-400" : "text-white/45 hover:text-white"}`}>
+                Domain Connected
+              </button>
+            </div>
+          )}
+
+          {/* Developer package summary */}
           {view === "developer" && !loading && (
             <div className="mb-6 space-y-3">
-              <p className="text-sm font-bold text-white">{selectedDev}&apos;s Websites</p>
+              <p className="text-sm font-bold text-white">
+                {selectedDev}&apos;s Websites — {devDomainOnly ? `domain connected in ${monthLabel(month)}` : monthLabel(month)}
+              </p>
               {PACKAGES.map(pkg => {
                 const group = subs.filter(s => packageBucket(s.package) === pkg);
                 if (group.length === 0) return null;
-                const connected = group.filter(s => s.domain_connected);
                 return (
                   <div key={pkg} className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
                     <p className="text-sm font-semibold text-white">{pkg}</p>
-                    <p className="text-xs text-white/40">{group.length} site{group.length !== 1 ? "s" : ""} · {connected.length} domain connected</p>
+                    <p className="text-xs text-white/40">
+                      {devDomainOnly
+                        ? `${group.length} connected in ${monthLabel(month)}`
+                        : `${group.length} site${group.length !== 1 ? "s" : ""} · ${group.filter(s => s.domain_connected).length} domain connected`}
+                    </p>
                   </div>
                 );
               })}
