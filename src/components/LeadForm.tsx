@@ -132,44 +132,55 @@ export default function LeadForm() {
   /* Issue 1 fix: selectedPkg properly derived so template string renders correctly */
   const selectedPkg = PACKAGES.find((p) => p.id === selectedPkgId);
 
+  // Fire-and-forget: records every failed/successful submit attempt (with name,
+  // business, and the reason) so the team can see who couldn't submit and why.
+  const logAttempt = (logStatus: "success" | "failed", reason: string) => {
+    fetch("/api/logs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: logStatus, reason, name: f.name, business: f.business, email: f.email, phone: f.phone }),
+    }).catch(() => {});
+  };
+  const fail = (reason: string) => { setStatus("error"); setErr(reason); logAttempt("failed", reason); };
+
   const submit = async () => {
     // Package validation
-    if (!selectedPkgId) { setStatus("error"); setErr("Please select your package first."); return; }
-    
+    if (!selectedPkgId) return fail("Please select your package first.");
+
     // Business details validation
     if (!f.business || !f.name || !f.email || !f.phone) {
-      setStatus("error"); setErr("Please fill in all your business details (Business name, Contact person, Email, Phone)."); return;
+      return fail("Please fill in all your business details (Business name, Contact person, Email, Phone).");
     }
-    if (!f.industry) { setStatus("error"); setErr("Please select your industry."); return; }
+    if (!f.industry) return fail("Please select your industry.");
     // Project details validation
-    if (!f.goal) { setStatus("error"); setErr("Please select your main business goal."); return; }
-    if (!f.audience) { setStatus("error"); setErr("Please describe your target audience."); return; }
-    
+    if (!f.goal) return fail("Please select your main business goal.");
+    if (!f.audience) return fail("Please describe your target audience.");
+
     // Brand & Design validation
-    if (!f.logo) { setStatus("error"); setErr("Please select a logo option."); return; }
-    if (f.logo === "Yes — I'll upload it" && !logoUrl) { setStatus("error"); setErr("Please upload your logo file."); return; }
-    if (!f.style) { setStatus("error"); setErr("Please select a design style."); return; }
-    if (!f.colors) { setStatus("error"); setErr("Please enter your brand colours."); return; }
+    if (!f.logo) return fail("Please select a logo option.");
+    if (f.logo === "Yes — I'll upload it" && !logoUrl) return fail("Please upload your logo file.");
+    if (!f.style) return fail("Please select a design style.");
+    if (!f.colors) return fail("Please enter your brand colours.");
     // Pages validation
-    if (f.pages.length === 0) { setStatus("error"); setErr("Please select at least one page for your website."); return; }
-    if (!f.headline) { setStatus("error"); setErr("Please enter your homepage headline."); return; }
-    if (!f.about) { setStatus("error"); setErr("Please describe your business."); return; }
-    
+    if (f.pages.length === 0) return fail("Please select at least one page for your website.");
+    if (!f.headline) return fail("Please enter your homepage headline.");
+    if (!f.about) return fail("Please describe your business.");
+
     // Services & Contact validation
-    if (!f.servicesList) { setStatus("error"); setErr("Please list your services with details."); return; }
-    if (!f.contactPageInfo) { setStatus("error"); setErr("Please provide contact page information."); return; }
-    
+    if (!f.servicesList) return fail("Please list your services with details.");
+    if (!f.contactPageInfo) return fail("Please provide contact page information.");
+
     // Pricing validation
-    if (!f.hasPricing) { setStatus("error"); setErr("Please select a pricing option."); return; }
+    if (!f.hasPricing) return fail("Please select a pricing option.");
     if ((f.hasPricing === "Yes — display prices" || f.hasPricing === "Starting price range only") && !f.pricingDetails) {
-      setStatus("error"); setErr("Please provide your pricing details."); return;
+      return fail("Please provide your pricing details.");
     }
-    
+
     // Additional details validation
-    if (!f.specialOffers) { setStatus("error"); setErr("Please enter your special offers or packages information."); return; }
-    if (!f.fileDetails) { setStatus("error"); setErr("Please provide notes or file details information."); return; }
-    if (!f.notes) { setStatus("error"); setErr("Please provide any additional notes or requirements."); return; }
-    
+    if (!f.specialOffers) return fail("Please enter your special offers or packages information.");
+    if (!f.fileDetails) return fail("Please provide notes or file details information.");
+    if (!f.notes) return fail("Please provide any additional notes or requirements.");
+
     setStatus("sending"); setErr("");
     try {
       const addonLabels = addons.map((id) => ADDONS.find((a) => a.id === id)?.label || id);
@@ -185,10 +196,10 @@ export default function LeadForm() {
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok) setStatus("sent");
-      else { setStatus("error"); setErr(data.error || "Something went wrong."); }
+      if (res.ok) { setStatus("sent"); logAttempt("success", "Submitted successfully"); }
+      else fail(data.error || "Something went wrong.");
     } catch {
-      setStatus("error"); setErr("Network error. Please try again.");
+      fail("Network error. Please try again.");
     }
   };
 

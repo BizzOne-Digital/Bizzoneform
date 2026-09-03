@@ -27,6 +27,13 @@ export async function getSubmissions() {
   return db.collection("submissions");
 }
 
+export async function getFormLogs() {
+  const db = await getDb();
+  const col = db.collection("form_logs");
+  await col.createIndex({ created_at: -1 });
+  return col;
+}
+
 export async function getCredentials() {
   const db = await getDb();
   const col = db.collection("credentials");

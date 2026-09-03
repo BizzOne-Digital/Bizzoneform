@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Search, LogOut, RefreshCw, X, Trash2, Upload, ChevronLeft, ChevronRight, Download, Globe } from "lucide-react";
+import Link from "next/link";
+import { Search, LogOut, RefreshCw, X, Trash2, Upload, ChevronLeft, ChevronRight, Download, Globe, ScrollText } from "lucide-react";
 import { DashboardCredentialsSection, CredentialsViewer } from "@/components/DashboardCredentials";
 
 type Status = "new" | "in_progress" | "done" | "on_hold";
@@ -330,6 +331,9 @@ export default function DashboardUI() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Link href="/dashboard/logs" className="flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/50 hover:text-white">
+            <ScrollText size={12} /> Logs
+          </Link>
           <button onClick={() => downloadCSV(subs, `bizzone-websites-${view}-${view === "all" ? "all" : month}.csv`)}
             className="flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/50 hover:text-white">
             <Download size={12} /> Generate Report
