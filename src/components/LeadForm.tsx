@@ -19,7 +19,7 @@ const STEPS = [
 /* ── Issue 3 fix: packages are display-only, not clickable ── */
 type Pkg = { id: string; name: string; price: string; tagline: string; pages: number; includes: string[] };
 const PACKAGES: Pkg[] = [
-  { id: "standard", name: "Standard", price: "$79", tagline: "Clean, professional website to get online fast.", pages: 5, includes: ["Up to 5 pages", "Contact form", "Stock photos", "Mobile responsive", "Basic on-page SEO"] },
+  { id: "standard", name: "Standard", price: "$79", tagline: "Clean, professional website to get online fast.", pages: 5, includes: ["Up to 5 pages", "Stock photos", "Mobile responsive", "Basic on-page SEO"] },
   { id: "premium", name: "Premium", price: "$149", tagline: "More pages and essential integrations for growing businesses.", pages: 12, includes: ["Up to 12 pages", "Contact form", "Admin Portal", "Booking / appointment form", "Payment integration setup", "Gallery management", "Mobile responsive + SEO setup"] },
   { id: "advanced", name: "Advanced", price: "$299", tagline: "Custom eCommerce website with products, payments, and business features.", pages: 15, includes: ["Up to 15 pages", "eCommerce ready", "Upload up to 50+ products", "Custom website design", "Payment gateway integration", "Order management setup", "Admin dashboard", "Basic automation features"] },
 ];
@@ -40,7 +40,7 @@ const ADDONS: Addon[] = [
 const GOALS = ["Generate leads", "Sell products online", "Book appointments", "Build brand awareness", "Showcase portfolio", "Inform customers"];
 const STYLES = ["Modern & minimalist", "Bold & graphic", "Corporate & professional", "Warm & approachable", "Luxury & high-end", "Dark & sleek"];
 const LOGO_OPTS = ["Yes — I'll upload it", "No — I need one designed", "Have one but needs updating"];
-const PAGES = ["Home", "About Us", "Services", "Contact", "Testimonials", "FAQ", "Pricing", "Blog / News", "Products / Shop", "Booking", "Our Team"];
+const PAGES = ["Home", "About Us", "Services", "Contact", "Testimonials", "FAQ", "Pricing", "Blogs", "Products / Shop", "Booking", "Our Team"];
 const INDUSTRIES = [
   "Healthcare & Medical", "Legal", "Real Estate", "Construction", "Home Services", "Automotive",
   "Finance & Insurance", "Technology & IT", "Marketing & Advertising", "Retail & E-commerce",
@@ -127,7 +127,13 @@ export default function LeadForm() {
     if (selectedPkgId === "standard" && p.pages.length >= 5) return p;
     return { ...p, pages: [...p.pages, v] };
   });
-  const toggleAddon = (id: string) => setAddons((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
+  const toggleAddon = (id: string) => setAddons((p) => {
+    const next = p.includes(id) ? p.filter((x) => x !== id) : [...p, id];
+    if (id === "ecommerce" && !next.includes("ecommerce")) {
+      setF((f2) => ({ ...f2, pages: f2.pages.filter((pg) => pg !== "Products / Shop") }));
+    }
+    return next;
+  });
 
   /* Issue 1 fix: selectedPkg properly derived so template string renders correctly */
   const selectedPkg = PACKAGES.find((p) => p.id === selectedPkgId);
@@ -376,7 +382,9 @@ export default function LeadForm() {
               : "Select your package above to see your page allowance."}
           </p>
           <label className={labelCls}>Select pages <span className="text-brand-mint">*</span></label>
-          <Pills options={PAGES} selected={f.pages} onToggle={togglePage} max={selectedPkgId === "standard" ? 5 : undefined} />
+          <Pills options={addons.includes("ecommerce") ? PAGES : PAGES.filter((p) => p !== "Products / Shop")}
+            selected={f.pages} onToggle={togglePage} max={selectedPkgId === "standard" ? 5 : undefined} />
+          {!addons.includes("ecommerce") && <p className="mt-2 text-xs text-white/40">Select the eCommerce / Online Store add-on above to unlock the Products / Shop page.</p>}
           {selectedPkgId === "standard" && <p className="mt-2 text-xs text-white/40">Standard plan includes up to 5 pages.</p>}
 
           <div className="mt-4"><label className={labelCls}>Homepage headline <span className="text-brand-mint">*</span></label><input className={field} value={f.headline} onChange={(e) => set("headline", e.target.value)} placeholder="First thing visitors read" /></div>
