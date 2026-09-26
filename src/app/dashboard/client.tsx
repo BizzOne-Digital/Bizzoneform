@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { Search, LogOut, RefreshCw, X, Trash2, Upload, ChevronLeft, ChevronRight, Download, Globe, ScrollText } from "lucide-react";
+import { Search, LogOut, RefreshCw, X, Trash2, Upload, ChevronLeft, ChevronRight, Download, Globe, ScrollText, XCircle } from "lucide-react";
 import { DashboardCredentialsSection, CredentialsViewer } from "@/components/DashboardCredentials";
 
 type Status = "new" | "in_progress" | "done" | "on_hold";
@@ -16,9 +16,10 @@ type Sub = {
   services_list: string; pricing_details: string; has_pricing: string;
   contact_page: string; special_offers: string; file_details: string;
   target_month?: string; domain_connected?: boolean; domain_connected_at?: string;
+  project_closed?: boolean;
 };
 
-type ViewMode = "all" | "month" | "domain_month" | "developer";
+type ViewMode = "all" | "month" | "domain_month" | "closed" | "developer";
 
 function currentMonth() {
   const d = new Date();
@@ -126,7 +127,7 @@ export default function DashboardUI() {
   const [view, setView]       = useState<ViewMode>("all");
   const [month, setMonth]     = useState(currentMonth());
   const [selectedDev, setSelectedDev] = useState<string>(TEAM[0]);
-  const [devDomainOnly, setDevDomainOnly] = useState(false);
+  const [devTab, setDevTab] = useState<"all" | "domain" | "closed">("all");
   const [selected, setSelected] = useState<Sub | null>(null);
   const [saving, setSaving]   = useState(false);
   const [eStatus, setEStatus] = useState<Status>("new");
@@ -134,6 +135,7 @@ export default function DashboardUI() {
   const [eNotes, setENotes]   = useState("");
   const [eMonth, setEMonth]   = useState(currentMonth());
   const [eDomain, setEDomain] = useState(false);
+  const [eProjectClosed, setEProjectClosed] = useState(false);
   const [ePackage, setEPackage] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -154,15 +156,21 @@ export default function DashboardUI() {
     if (search) p.set("search", search);
     if (view === "month" || view === "domain_month") p.set("month", month);
     if (view === "domain_month") p.set("domain_connected", "true");
+    if (view === "closed") p.set("project_closed", "true");
     if (view === "developer") {
       p.set("assigned_to", selectedDev);
-      p.set("month", month);
-      if (devDomainOnly) p.set("domain_connected", "true");
+      if (devTab === "closed") {
+        // Closed projects show regardless of month — no target_month restriction.
+        p.set("project_closed", "true");
+      } else {
+        p.set("month", month);
+        if (devTab === "domain") p.set("domain_connected", "true");
+      }
     }
     const res = await fetch(`/api/submissions?${p}`);
     if (res.ok) setSubs(await res.json());
     setLoading(false);
-  }, [filter, search, view, month, selectedDev, devDomainOnly]);
+  }, [filter, search, view, month, selectedDev, devTab]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -173,6 +181,7 @@ export default function DashboardUI() {
     setENotes(s.internal_notes || "");
     setEMonth(subMonth(s));
     setEDomain(!!s.domain_connected);
+    setEProjectClosed(!!s.project_closed);
     setEPackage(s.package || "");
   };
 
@@ -181,7 +190,7 @@ export default function DashboardUI() {
     setSaving(true);
     const body = {
       id: selected.id, status: eStatus, assigned_to: eAssign, internal_notes: eNotes,
-      target_month: eMonth, domain_connected: eDomain, package: ePackage, ...overrides,
+      target_month: eMonth, domain_connected: eDomain, project_closed: eProjectClosed, package: ePackage, ...overrides,
     };
     const res = await fetch("/api/submissions", {
       method: "PATCH",
@@ -195,6 +204,7 @@ export default function DashboardUI() {
       setEStatus(updated.status);
       setEMonth(subMonth(updated));
       setEDomain(!!updated.domain_connected);
+      setEProjectClosed(!!updated.project_closed);
       setEPackage(updated.package || "");
     }
     setSaving(false);
@@ -228,6 +238,19 @@ export default function DashboardUI() {
       const updated = await res.json();
       setSubs(p => p.map(x => x.id === updated.id ? updated : x));
       if (selected?.id === updated.id) { setSelected(updated); setEDomain(!!updated.domain_connected); }
+    }
+  };
+
+  const toggleProjectClosed = async (s: Sub) => {
+    const res = await fetch("/api/submissions", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: s.id, status: s.status, assigned_to: s.assigned_to, internal_notes: s.internal_notes, project_closed: !s.project_closed }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setSubs(p => p.map(x => x.id === updated.id ? updated : x));
+      if (selected?.id === updated.id) { setSelected(updated); setEProjectClosed(!!updated.project_closed); }
     }
   };
 
@@ -315,6 +338,7 @@ export default function DashboardUI() {
     { k: "all",          l: "All Websites" },
     { k: "month",        l: "This Month" },
     { k: "domain_month", l: "Domain Connected" },
+    { k: "closed",       l: "Closed Projects" },
   ];
 
   return (
@@ -376,7 +400,7 @@ export default function DashboardUI() {
             </button>
           ))}
 
-          {(view === "month" || view === "domain_month" || view === "developer") && (
+          {(view === "month" || view === "domain_month" || (view === "developer" && devTab !== "closed")) && (
             <div className="mt-3 flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-2 py-2">
               <button onClick={() => setMonth(m => shiftMonth(m, -1))} className="grid h-6 w-6 place-items-center rounded-lg text-white/40 hover:text-white">
                 <ChevronLeft size={14} />
@@ -421,25 +445,29 @@ export default function DashboardUI() {
             </select>
           </div>
 
-          {/* Developer view: All / Domain Connected tabs */}
+          {/* Developer view: All / Domain Connected / Closed tabs */}
           {view === "developer" && (
             <div className="mb-5 flex gap-2">
-              <button onClick={() => setDevDomainOnly(false)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${!devDomainOnly ? "bg-white/10 text-white" : "text-white/45 hover:text-white"}`}>
+              <button onClick={() => setDevTab("all")}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${devTab === "all" ? "bg-white/10 text-white" : "text-white/45 hover:text-white"}`}>
                 All Websites
               </button>
-              <button onClick={() => setDevDomainOnly(true)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${devDomainOnly ? "bg-green-500/15 text-green-400" : "text-white/45 hover:text-white"}`}>
+              <button onClick={() => setDevTab("domain")}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${devTab === "domain" ? "bg-green-500/15 text-green-400" : "text-white/45 hover:text-white"}`}>
                 Domain Connected
+              </button>
+              <button onClick={() => setDevTab("closed")}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${devTab === "closed" ? "bg-red-500/15 text-red-400" : "text-white/45 hover:text-white"}`}>
+                Closed
               </button>
             </div>
           )}
 
           {/* Developer package summary */}
-          {view === "developer" && !loading && (
+          {view === "developer" && !loading && devTab !== "closed" && (
             <div className="mb-6 space-y-3">
               <p className="text-sm font-bold text-white">
-                {selectedDev}&apos;s Websites — {devDomainOnly ? `domain connected in ${monthLabel(month)}` : monthLabel(month)}
+                {selectedDev}&apos;s Websites — {devTab === "domain" ? `domain connected in ${monthLabel(month)}` : monthLabel(month)}
               </p>
               {PACKAGES.map(pkg => {
                 const group = subs.filter(s => packageBucket(s.package) === pkg);
@@ -448,7 +476,7 @@ export default function DashboardUI() {
                   <div key={pkg} className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
                     <p className="text-sm font-semibold text-white">{pkg}</p>
                     <p className="text-xs text-white/40">
-                      {devDomainOnly
+                      {devTab === "domain"
                         ? `${group.length} connected in ${monthLabel(month)}`
                         : `${group.length} site${group.length !== 1 ? "s" : ""} · ${group.filter(s => s.domain_connected).length} domain connected`}
                     </p>
@@ -472,7 +500,7 @@ export default function DashboardUI() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/6">
-                      {["Business", "Contact", "Industry", "Package", "Date", "Month", "Domain", "Assigned", "Status", ""].map(h => (
+                      {["Business", "Contact", "Industry", "Package", "Date", "Month", "Domain", "Project", "Assigned", ""].map(h => (
                         <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-white/35">{h}</th>
                       ))}
                     </tr>
@@ -503,12 +531,17 @@ export default function DashboardUI() {
                             <Globe size={10} /> {s.domain_connected ? "Connected" : "Not Connected"}
                           </button>
                         </td>
-                        <td className="px-4 py-3 text-white/60">{s.assigned_to || "—"}</td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${BADGE[s.status]}`}>
-                            {LABEL[s.status]}
-                          </span>
+                        <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+                          {s.project_closed ? (
+                            <button onClick={() => toggleProjectClosed(s)}
+                              className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-[10px] font-bold uppercase text-red-400">
+                              <XCircle size={10} /> Closed
+                            </button>
+                          ) : (
+                            <button onClick={() => toggleProjectClosed(s)} className="text-xs text-white/25 hover:text-white/50">—</button>
+                          )}
                         </td>
+                        <td className="px-4 py-3 text-white/60">{s.assigned_to || "—"}</td>
                         <td className="px-4 py-3 text-white/30">›</td>
                       </tr>
                     ))}
@@ -567,6 +600,11 @@ export default function DashboardUI() {
                 <button onClick={() => setEDomain(v => !v)}
                   className={`flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-semibold transition-all ${eDomain ? "border-green-500/30 bg-green-500/15 text-green-400" : "border-white/10 bg-white/[0.02] text-white/50"}`}>
                   <Globe size={14} /> Domain {eDomain ? "Connected" : "Not Connected"}
+                </button>
+
+                <button onClick={() => setEProjectClosed(v => !v)}
+                  className={`flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-semibold transition-all ${eProjectClosed ? "border-red-500/30 bg-red-500/15 text-red-400" : "border-white/10 bg-white/[0.02] text-white/50"}`}>
+                  <XCircle size={14} /> {eProjectClosed ? "Project Closed" : "Project Active"}
                 </button>
 
                 <button onClick={() => save()} disabled={saving}

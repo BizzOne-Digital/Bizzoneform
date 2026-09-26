@@ -73,6 +73,7 @@ export async function GET(req: Request) {
   const search = searchParams.get("search");
   const month = searchParams.get("month"); // "YYYY-MM"
   const domainConnected = searchParams.get("domain_connected"); // "true" | "false"
+  const projectClosed = searchParams.get("project_closed"); // "true" | "false"
   const assignedTo = searchParams.get("assigned_to");
 
   const col = await getSubmissions();
@@ -81,6 +82,8 @@ export async function GET(req: Request) {
   const query: Record<string, unknown> = {};
   if (status && status !== "all") query.status = status;
   if (assignedTo) query.assigned_to = assignedTo;
+  if (projectClosed === "true") query.project_closed = true;
+  else if (projectClosed === "false") query.project_closed = { $ne: true };
 
   if (domainConnected === "true") {
     query.domain_connected = true;
@@ -123,13 +126,14 @@ export async function PATCH(req: Request) {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { id, status, assigned_to, internal_notes, logo_url, target_month, domain_connected, package: pkg } = await req.json();
+  const { id, status, assigned_to, internal_notes, logo_url, target_month, domain_connected, package: pkg, project_closed } = await req.json();
   if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
   const update: Record<string, unknown> = { status, assigned_to, internal_notes };
   if (logo_url !== undefined) update.logo_url = logo_url;
   if (target_month !== undefined) update.target_month = target_month;
   if (pkg !== undefined) update.package = pkg;
+  if (project_closed !== undefined) update.project_closed = project_closed;
 
   const col = await getSubmissions();
 
