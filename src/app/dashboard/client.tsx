@@ -185,12 +185,17 @@ export default function DashboardUI() {
     setEPackage(s.package || "");
   };
 
-  const save = async (overrides: Partial<{ target_month: string; domain_connected: boolean }> = {}) => {
+  const save = async (overrides: Partial<{ target_month: string }> = {}) => {
     if (!selected) return;
     setSaving(true);
+    // Domain Connected / Project Closed save instantly via their own toggle
+    // buttons (see toggleDomainConnected/toggleProjectClosed) — deliberately
+    // left out here so saving other fields never re-stamps/overwrites them
+    // with stale state, which previously caused target_month to get
+    // clobbered when a stray click on the month arrows preceded Save.
     const body = {
       id: selected.id, status: eStatus, assigned_to: eAssign, internal_notes: eNotes,
-      target_month: eMonth, domain_connected: eDomain, project_closed: eProjectClosed, package: ePackage, ...overrides,
+      target_month: eMonth, package: ePackage, ...overrides,
     };
     const res = await fetch("/api/submissions", {
       method: "PATCH",
@@ -218,7 +223,7 @@ export default function DashboardUI() {
     const res = await fetch("/api/submissions", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: selected.id, status: eStatus, assigned_to: eAssign, internal_notes: eNotes, target_month: newMonth, domain_connected: eDomain }),
+      body: JSON.stringify({ id: selected.id, status: eStatus, assigned_to: eAssign, internal_notes: eNotes, target_month: newMonth }),
     });
     if (res.ok) {
       const updated = await res.json();
@@ -597,12 +602,12 @@ export default function DashboardUI() {
                   </div>
                 </div>
 
-                <button onClick={() => setEDomain(v => !v)}
+                <button onClick={() => selected && toggleDomainConnected(selected)}
                   className={`flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-semibold transition-all ${eDomain ? "border-green-500/30 bg-green-500/15 text-green-400" : "border-white/10 bg-white/[0.02] text-white/50"}`}>
                   <Globe size={14} /> Domain {eDomain ? "Connected" : "Not Connected"}
                 </button>
 
-                <button onClick={() => setEProjectClosed(v => !v)}
+                <button onClick={() => selected && toggleProjectClosed(selected)}
                   className={`flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-semibold transition-all ${eProjectClosed ? "border-red-500/30 bg-red-500/15 text-red-400" : "border-white/10 bg-white/[0.02] text-white/50"}`}>
                   <XCircle size={14} /> {eProjectClosed ? "Project Closed" : "Project Active"}
                 </button>
